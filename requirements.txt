@@ -6,3 +6,4 @@ PyPDF2
 faiss-cpu
 python-dotenv
 langchain-community
+speechrecognition
