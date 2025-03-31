@@ -8,14 +8,13 @@ from langchain.chains.question_answering import load_qa_chain
 from langchain.prompts import PromptTemplate
 from dotenv import load_dotenv
 import google.generativeai as genai
-import speech_recognition as sr
 from gtts import gTTS
 import tempfile
 import re
 
-headers={
-    "authorization":st.secrets["GOOGLE_API_KEY"],
-    "content-type":"application/json"
+headers = {
+    "authorization": st.secrets["GOOGLE_API_KEY"],
+    "content-type": "application/json"
 }
 
 # Language mapping for gTTS
@@ -94,31 +93,16 @@ if uploaded_files:
     st.success("PDFs processed successfully! Ask any question.")
 
 user_input = st.text_input("Ask a question about the document")
+
+# Ensure answers are displayed only once
 if st.button("Get Answer") and user_input:
     response = process_user_message(user_input)
     st.session_state.chat_history.append((user_input, response))
-    st.write(f"**Bot:** {response}")
 
+# Display chat history
 for chat in st.session_state.chat_history:
     st.write(f"**You:** {chat[0]}")
     st.write(f"**Bot:** {chat[1]}")
-
-# Speech-to-text
-if st.button("🎙️ Speak Question"):
-    recognizer = sr.Recognizer()
-    with sr.Microphone() as source:
-        st.write("Listening...")
-        audio = recognizer.listen(source)
-    try:
-        spoken_text = recognizer.recognize_google(audio, language=LANGUAGE_MAPPING[language])
-        st.text_input("You said:", spoken_text)
-        response = process_user_message(spoken_text)
-        st.session_state.chat_history.append((spoken_text, response))
-        st.write(f"**Bot:** {response}")
-    except sr.UnknownValueError:
-        st.write("Could not understand the audio. Please try again.")
-    except sr.RequestError as e:
-        st.write(f"Error: {e}")
 
 # Text-to-Speech
 if st.button("🔊 Read Answer"):
