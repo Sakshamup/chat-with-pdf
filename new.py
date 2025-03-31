@@ -13,9 +13,10 @@ from gtts import gTTS
 import tempfile
 import re
 
-# Load environment variables
-load_dotenv()
-genai.configure(api_key=os.getenv("GOOGLE_API_KEY"))
+headers={
+    "authorization":st.secrets["GOOGLE_API_KEY"],
+    "content-type":"application/json"
+}
 
 # Language mapping for gTTS
 LANGUAGE_MAPPING = {
