@@ -57,23 +57,23 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Normalized CSS with same colors but reduced animations
+# Simplified CSS with fewer colors
 st.markdown("""
 <style>
-    /* Main app background with static gradient */
+    /* Main app background - simple blue gradient */
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
+        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
     }
     
     /* Main page container with glass effect */
     .main .block-container {
-        background: rgba(255, 255, 255, 0.1);
+        background: rgba(255, 255, 255, 0.15);
         backdrop-filter: blur(15px);
-        border-radius: 20px;
+        border-radius: 15px;
         border: 1px solid rgba(255, 255, 255, 0.2);
         padding: 2rem;
         margin: 1rem;
-        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
     }
     
     .main-header {
@@ -93,52 +93,43 @@ st.markdown("""
         text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         background: rgba(255, 255, 255, 0.1);
         padding: 1rem;
-        border-radius: 12px;
+        border-radius: 10px;
         backdrop-filter: blur(10px);
     }
     
     .upload-section {
-        background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 50%, #a8edea 100%);
+        background: rgba(255, 255, 255, 0.2);
         padding: 1.5rem;
-        border-radius: 15px;
-        border: 2px dashed #ff6b6b;
+        border-radius: 12px;
+        border: 2px dashed rgba(255, 255, 255, 0.6);
         margin: 1rem 0;
-        box-shadow: 0 6px 20px rgba(255, 107, 107, 0.2);
-    }
-    
-    .chat-container {
-        background: rgba(255, 255, 255, 0.95);
-        padding: 1.5rem;
-        border-radius: 15px;
-        margin: 1rem 0;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
     }
     
     .user-message {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        background: #4a90e2;
         color: white;
         padding: 1rem;
-        border-radius: 15px;
+        border-radius: 12px;
         margin: 1rem 0;
-        border-left: 4px solid #ff6b6b;
-        box-shadow: 0 3px 10px rgba(102, 126, 234, 0.3);
+        border-left: 4px solid #357abd;
+        box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
     }
     
     .bot-message {
-        background: linear-gradient(135deg, #4ecdc4 0%, #44a08d 100%);
+        background: #28a745;
         color: white;
         padding: 1rem;
-        border-radius: 15px;
+        border-radius: 12px;
         margin: 1rem 0;
-        border-left: 4px solid #feca57;
-        box-shadow: 0 3px 10px rgba(78, 205, 196, 0.3);
+        border-left: 4px solid #1e7e34;
+        box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
     }
     
-    /* Sidebar with gradient */
+    /* Sidebar with simple gradient */
     .css-1d391kg, .css-18e3th9, section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #f5576c 75%, #4facfe 100%);
-        border-radius: 12px;
+        background: linear-gradient(180deg, #4a90e2 0%, #357abd 100%);
+        border-radius: 10px;
         border: 1px solid rgba(255, 255, 255, 0.2);
     }
     
@@ -147,54 +138,51 @@ st.markdown("""
     }
     
     .feature-box {
-        background: linear-gradient(135deg, #ffecd2 0%, #fcb69f 50%, #a8edea 100%);
+        background: rgba(255, 255, 255, 0.2);
         padding: 1.2rem;
-        border-radius: 12px;
-        box-shadow: 0 4px 15px rgba(252, 182, 159, 0.3);
+        border-radius: 10px;
+        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
         margin: 0.5rem 0;
         text-align: center;
-        border: 1px solid #ff9ff3;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        backdrop-filter: blur(10px);
     }
     
     .feature-box:hover {
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(252, 182, 159, 0.4);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+        background: rgba(255, 255, 255, 0.25);
     }
     
-    /* Button styling */
+    /* Button styling - simple blue theme */
     .stButton > button {
-        background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1);
+        background: #4a90e2;
         color: white;
         border: none;
-        border-radius: 20px;
+        border-radius: 8px;
         padding: 0.6rem 1.8rem;
         font-weight: 600;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2);
+        box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
         transition: all 0.2s ease;
     }
     
     .stButton > button:hover {
         transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3);
-        background: linear-gradient(45deg, #4ecdc4, #ff6b6b, #feca57);
+        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
+        background: #357abd;
     }
     
     /* Input field styling */
     .stTextInput > div > div > input {
-        border-radius: 20px;
-        border: 2px solid transparent;
-        background: linear-gradient(white, white) padding-box,
-                   linear-gradient(45deg, #ff6b6b, #4ecdc4, #feca57) border-box;
+        border-radius: 8px;
+        border: 2px solid #4a90e2;
         padding: 0.6rem 1rem;
+        background: rgba(255, 255, 255, 0.9);
     }
     
-    /* Success/warning message styling */
-    .success {
-        background: linear-gradient(135deg, #4ecdc4, #44a08d);
-        color: white;
-        padding: 1rem;
-        border-radius: 12px;
-        box-shadow: 0 3px 10px rgba(78, 205, 196, 0.3);
+    .stTextInput > div > div > input:focus {
+        border-color: #357abd;
+        box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
     }
     
     /* Section headers */
@@ -210,19 +198,20 @@ st.markdown("""
     
     /* Radio button container */
     .stRadio > div {
-        background: rgba(255, 255, 255, 0.2);
+        background: rgba(255, 255, 255, 0.15);
         padding: 1rem;
-        border-radius: 12px;
+        border-radius: 10px;
         backdrop-filter: blur(10px);
         border: 1px solid rgba(255, 255, 255, 0.3);
     }
     
     /* Metrics styling */
     .css-1r6slb0 {
-        background: linear-gradient(135deg, #a8edea 0%, #fed6e3 100%);
-        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.2);
+        border-radius: 10px;
         padding: 1rem;
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        backdrop-filter: blur(10px);
     }
     
     /* File uploader styling */
@@ -230,11 +219,11 @@ st.markdown("""
     section[data-testid="stFileUploader"],
     .css-1cpxqw2 > div,
     div[data-testid="stFileUploader"] {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 25%, #f093fb 50%, #4facfe 100%) !important;
-        border-radius: 15px !important;
+        background: rgba(255, 255, 255, 0.1) !important;
+        border-radius: 12px !important;
         border: 2px dashed rgba(255, 255, 255, 0.8) !important;
         padding: 1.5rem !important;
-        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15) !important;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
     }
     
     /* File uploader text styling */
@@ -248,20 +237,20 @@ st.markdown("""
     
     /* Browse files button styling */
     div[data-testid="stFileUploader"] button {
-        background: linear-gradient(45deg, #ff6b6b, #4ecdc4) !important;
+        background: #4a90e2 !important;
         color: white !important;
         border: none !important;
-        border-radius: 20px !important;
+        border-radius: 8px !important;
         padding: 0.6rem 1.5rem !important;
         font-weight: 600 !important;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.2) !important;
+        box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3) !important;
         transition: all 0.2s ease !important;
     }
     
     div[data-testid="stFileUploader"] button:hover {
         transform: translateY(-1px) !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.3) !important;
-        background: linear-gradient(45deg, #4ecdc4, #ff6b6b) !important;
+        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4) !important;
+        background: #357abd !important;
     }
     
     /* File upload icon styling */
@@ -274,14 +263,14 @@ st.markdown("""
     .css-18e3th9 {
         background: transparent !important;
         padding: 1rem;
-        border-radius: 12px;
+        border-radius: 10px;
     }
     
     /* Sidebar text styling */
     section[data-testid="stSidebar"] h3 {
         background: rgba(255, 255, 255, 0.2);
         padding: 0.6rem 1rem;
-        border-radius: 10px;
+        border-radius: 8px;
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 255, 255, 0.3);
         color: #ffffff;
@@ -291,7 +280,7 @@ st.markdown("""
     /* Sidebar metrics styling */
     section[data-testid="stSidebar"] .css-1r6slb0 {
         background: rgba(255, 255, 255, 0.2);
-        border-radius: 12px;
+        border-radius: 10px;
         padding: 1rem;
         box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
         backdrop-filter: blur(10px);
@@ -302,7 +291,7 @@ st.markdown("""
     section[data-testid="stSidebar"] .stAlert {
         background: rgba(255, 255, 255, 0.2);
         color: #ffffff;
-        border-radius: 12px;
+        border-radius: 10px;
         border: 1px solid rgba(255, 255, 255, 0.3);
         backdrop-filter: blur(10px);
     }
@@ -313,16 +302,35 @@ st.markdown("""
         color: #ffffff;
         text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
     }
+
+    /* Success and error messages */
+    .stSuccess {
+        background: #28a745;
+        color: white;
+        border-radius: 8px;
+    }
+    
+    .stError {
+        background: #dc3545;
+        color: white;
+        border-radius: 8px;
+    }
+    
+    .stWarning {
+        background: #ffc107;
+        color: #212529;
+        border-radius: 8px;
+    }
 </style>
 """, unsafe_allow_html=True)
 
-# Main title with normalized styling
-st.markdown('<h1 class="main-header">🌟 AI PDF Chatbot 🌟</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">✨ Intelligent Document Analysis with Enhanced Answer Retrieval ✨</p>', unsafe_allow_html=True)
+# Main title
+st.markdown('<h1 class="main-header">📄 AI PDF Chatbot</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Intelligent Document Analysis with Enhanced Answer Retrieval</p>', unsafe_allow_html=True)
 
-# Sidebar with styling
+# Sidebar
 with st.sidebar:
-    st.markdown("### 🎨 Settings")
+    st.markdown("### ⚙️ Settings")
     
     # Language selection for text-to-speech
     language = st.selectbox(
@@ -332,24 +340,24 @@ with st.sidebar:
     )
     
     st.markdown("---")
-    st.markdown("### 🎯 Status")
+    st.markdown("### 📊 Status")
     if "vector_store_ready" in st.session_state and st.session_state.vector_store_ready:
-        st.markdown("🟢 **PDF Processed Successfully!**")
+        st.markdown("🟢 **PDF Processed Successfully**")
     else:
-        st.markdown("🟡 **Upload PDF to start!**")
+        st.markdown("🟡 **Upload PDF to start**")
     
     # Quick stats
     if "chat_history" in st.session_state and st.session_state.chat_history:
-        st.metric("💬 Total Questions", len(st.session_state.chat_history))
+        st.metric("💬 Questions Asked", len(st.session_state.chat_history))
     
     # Info section
     st.markdown("---")
-    st.markdown("### 💡 Info")
-    st.info(f"Enhanced AI can read your documents and speak answers in {language}!")
+    st.markdown("### ℹ️ Information")
+    st.info(f"AI can read your documents and speak answers in {language}")
 
 # File upload section
 st.markdown('<div class="upload-section">', unsafe_allow_html=True)
-st.markdown("### 🚀 Upload Your Documents")
+st.markdown("### 📁 Upload Your Documents")
 st.markdown("**Drag & drop your PDF files here or click to browse**")
 uploaded_files = st.file_uploader(
     "Choose PDF files", 
@@ -646,7 +654,7 @@ with col1:
     )
 
 with col2:
-    ask_button = st.button("🚀 Ask", type="primary", use_container_width=True)
+    ask_button = st.button("Ask", type="primary", use_container_width=True)
 
 # Process question
 if ask_button and user_input:
@@ -661,20 +669,20 @@ if ask_button and user_input:
 
 # Display chat history
 if st.session_state.chat_history:
-    st.markdown("### 🗨️ Conversation History")
+    st.markdown("### 💭 Conversation History")
     
     for i, (question, answer) in enumerate(reversed(st.session_state.chat_history)):
         # User message
         st.markdown(f'''
         <div class="user-message">
-            <strong>🙋‍♀️ You:</strong> {question}
+            <strong>You:</strong> {question}
         </div>
         ''', unsafe_allow_html=True)
         
         # Bot message
         st.markdown(f'''
         <div class="bot-message">
-            <strong>🤖 AI:</strong> {answer}
+            <strong>AI:</strong> {answer}
         </div>
         ''', unsafe_allow_html=True)
         
@@ -683,7 +691,7 @@ if st.session_state.chat_history:
 
 # Feature buttons
 if st.session_state.chat_history:
-    st.markdown("### 🛠️ Features")
+    st.markdown("### 🛠️ Actions")
     
     col1, col2, col3 = st.columns(3)
     
@@ -697,7 +705,7 @@ if st.session_state.chat_history:
                 
                 # Use the speak_text function with selected language
                 if speak_text(response_text, lang_code):
-                    st.success(f"🎵 Audio ready in {language}!")
+                    st.success(f"🎵 Audio ready in {language}")
                 else:
                     st.error(f"Audio failed for {language}")
                     
@@ -732,14 +740,14 @@ if st.session_state.chat_history:
 # Feedback section
 if st.session_state.chat_history:
     st.markdown("---")
-    st.markdown("### ⭐ Rate the Response")
+    st.markdown("### ⭐ Feedback")
     
     col1, col2 = st.columns([2, 3])
     
     with col1:
         feedback = st.radio(
             "How was the response?",
-            ["⭐ Excellent!", "👍 Good!", "👎 Could be better"],
+            ["⭐ Excellent", "👍 Good", "👎 Needs improvement"],
             horizontal=True
         )
     
@@ -751,13 +759,13 @@ if st.session_state.chat_history:
 st.markdown("---")
 st.markdown(
     """
-    <div style='text-align: center; color: #ffffff; padding: 1.5rem; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #feca57, #ff9ff3); border-radius: 12px; margin-top: 2rem; box-shadow: 0 6px 20px rgba(0, 0, 0, 0.15);'>
-        <h3>🌈 Enhanced PDF Chatbot</h3>
+    <div style='text-align: center; color: #ffffff; padding: 1.5rem; background: #4a90e2; border-radius: 10px; margin-top: 2rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);'>
+        <h3>📄 AI PDF Chatbot</h3>
         <p style='font-size: 1rem; margin-top: 1rem;'>
-            🚀 <strong>Upload PDF → Ask Questions → Get Answers!</strong> 🌟
+            <strong>Upload PDF → Ask Questions → Get Answers</strong>
         </p>
         <p style='font-size: 0.9rem; opacity: 0.9;'>
-            Experience intelligent document analysis with AI 🤖
+            Experience intelligent document analysis with AI
         </p>
     </div>
     """, 
