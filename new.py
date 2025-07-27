@@ -39,7 +39,6 @@ try:
         st.stop()
     
     genai.configure(api_key=api_key)
-    st.success("✅ Google API configured successfully!")
 except Exception as e:
     st.error(f"🚨 API Configuration Error: {str(e)}")
     st.stop()
