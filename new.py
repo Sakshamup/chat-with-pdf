@@ -717,4 +717,262 @@ def enhance_query(query):
         "benefits": ["advantages", "positives", "pros", "value"],
         "problems": ["issues", "challenges", "difficulties", "concerns"],
         "cost": ["price", "expense", "budget", "financial"],
-        "process": ["procedure", "method", "steps",
+        "process": ["procedure", "method", "steps", "approach"],
+        "result": ["outcome", "finding", "conclusion", "effect"]
+    }
+    
+    query_lower = query.lower()
+    for key, synonyms in common_synonyms.items():
+        if key in query_lower:
+            enhanced_terms.extend(synonyms)
+    
+    return " ".join(enhanced_terms)
+
+def process_user_message(user_input):
+    """Process user message with enhanced error handling"""
+    try:
+        with st.spinner("🤔 Processing your question..."):
+            # Check if vector store exists
+            if not os.path.exists("faiss_index"):
+                return "❌ Vector store not found. Please upload and process a PDF first."
+            
+            # Initialize embeddings
+            embeddings = GoogleGenerativeAIEmbeddings(
+                model="models/embedding-001",
+                google_api_key=os.getenv("GOOGLE_API_KEY")
+            )
+            
+            # Load vector store
+            try:
+                vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            except Exception as load_error:
+                return f"❌ Error loading vector store: {str(load_error)}. Please reprocess your PDF."
+            
+            # Enhanced query
+            enhanced_query = enhance_query(user_input)
+            
+            # Get more documents for better context (fixed at 6)
+            num_docs = 6
+            docs = vector_store.similarity_search(enhanced_query, k=num_docs)
+        
+            # Also try with the original query if enhanced query doesn't yield good results
+            if len(docs) < num_docs:
+                additional_docs = vector_store.similarity_search(user_input, k=num_docs)
+                # Combine and deduplicate
+                all_docs = docs + additional_docs
+                seen_content = set()
+                unique_docs = []
+                for doc in all_docs:
+                    if doc.page_content not in seen_content:
+                        unique_docs.append(doc)
+                        seen_content.add(doc.page_content)
+                docs = unique_docs[:num_docs]
+            
+            # If still no good matches, try with more relaxed search
+            if len(docs) < 3:
+                # Try searching with individual words from the query
+                words = user_input.split()
+                for word in words:
+                    if len(word) > 3:  # Only search meaningful words
+                        word_docs = vector_store.similarity_search(word, k=2)
+                        docs.extend(word_docs)
+            
+            # Get conversational chain
+            chain = get_conversational_chain()
+            if not chain:
+                return "❌ Error initializing AI model. Please check your API configuration."
+            
+            try:
+                response = chain({"input_documents": docs, "question": user_input}, return_only_outputs=True)
+                answer = response["output_text"]
+                
+                # If we still get a "not available" response, try a fallback approach
+                if "not available in the context" in answer.lower() or "cannot find" in answer.lower():
+                    # Try a more general search
+                    general_docs = vector_store.similarity_search(user_input, k=10)
+                    if general_docs:
+                        fallback_response = chain({"input_documents": general_docs, "question": f"Based on the available information, what can you tell me about: {user_input}"}, return_only_outputs=True)
+                        fallback_answer = fallback_response["output_text"]
+                        if "not available" not in fallback_answer.lower():
+                            answer = fallback_answer
+                
+                return answer
+                
+            except Exception as chain_error:
+                return f"❌ Error processing question: {str(chain_error)}"
+                
+    except Exception as e:
+        return f"❌ Critical error: {str(e)}"
+
+def speak_text(text, language_code="en"):
+    """Convert text to speech and play it"""
+    try:
+        tts = gTTS(text=text, lang=language_code)
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        tts.save(temp_file.name)
+        st.audio(temp_file.name, format="audio/mp3", autoplay=True)
+        return True
+    except Exception as e:
+        st.error(f"❌ Text-to-speech error: {str(e)}")
+        return False
+
+# Initialize chat history
+if "chat_history" not in st.session_state:
+    st.session_state.chat_history = []
+
+# PDF Processing
+if uploaded_files:
+    # Extract text from PDFs
+    raw_text = extract_text_from_pdfs(uploaded_files)
+    
+    if raw_text:
+        # Preprocess text
+        processed_text = preprocess_text(raw_text)
+        
+        if processed_text:
+            # Create vector store and get chunk count
+            chunk_count = create_vector_store(processed_text)
+            
+            if chunk_count > 0:
+                # Store the chunk count and set ready flag
+                st.session_state.chunk_count = chunk_count
+                st.session_state.vector_store_ready = True
+                st.success(f"✅ PDFs processed successfully!")
+            else:
+                st.error("❌ Failed to create vector store. Please try again or check your API configuration.")
+        else:
+            st.error("❌ Failed to preprocess text. Please check your PDF files.")
+    else:
+        st.error("❌ Failed to extract text from PDFs. Please ensure your PDFs contain readable text.")
+
+# Chat Interface
+st.markdown("### 💬 Ask Questions")
+
+# Create columns for better layout
+col1, col2 = st.columns([4, 1])
+
+with col1:
+    user_input = st.text_input(
+        "What would you like to know about your document?",
+        placeholder="e.g., What is the main topic of this document?",
+        label_visibility="collapsed"
+    )
+
+with col2:
+    ask_button = st.button("Ask", type="primary", use_container_width=True)
+
+# Process question
+if ask_button and user_input:
+    if "vector_store_ready" not in st.session_state:
+        st.warning("⚠️ Please upload and process a PDF first!")
+    else:
+        # Get the response
+        response = process_user_message(user_input)
+        
+        # Store the response
+        st.session_state.chat_history.append((user_input, response))
+
+# Display chat history
+if st.session_state.chat_history:
+    st.markdown("### 💭 Conversation History")
+    
+    for i, (question, answer) in enumerate(reversed(st.session_state.chat_history)):
+        # User message
+        st.markdown(f'''
+        <div class="user-message">
+            <strong>You:</strong> {question}
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        # Bot message
+        st.markdown(f'''
+        <div class="bot-message">
+            <strong>AI:</strong> {answer}
+        </div>
+        ''', unsafe_allow_html=True)
+        
+        if i < len(st.session_state.chat_history) - 1:
+            st.markdown("---")
+
+# Feature buttons
+if st.session_state.chat_history:
+    st.markdown("### 🛠️ Actions")
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.markdown('<div class="feature-box">', unsafe_allow_html=True)
+        if st.button("🔊 Listen", use_container_width=True):
+            try:
+                # Get the language code for the selected language
+                lang_code = LANGUAGE_MAPPING[language]
+                response_text = st.session_state.chat_history[-1][1]
+                
+                # Use the speak_text function with selected language
+                if speak_text(response_text, lang_code):
+                    st.success(f"🎵 Audio ready in {language}")
+                else:
+                    st.error(f"Audio failed for {language}")
+                    
+            except Exception as e:
+                st.error(f"Audio failed: {str(e)}")
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col2:
+        st.markdown('<div class="feature-box">', unsafe_allow_html=True)
+        if st.button("💾 Export", use_container_width=True):
+            chat_text = "\n".join([f"Q: {chat[0]}\nA: {chat[1]}\n{'-'*50}\n" for chat in st.session_state.chat_history])
+            st.download_button(
+                "📥 Download", 
+                chat_text, 
+                file_name="chat_history.txt",
+                mime="text/plain",
+                use_container_width=True
+            )
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col3:
+        st.markdown('<div class="feature-box">', unsafe_allow_html=True)
+        if st.button("🗑️ Clear", use_container_width=True):
+            st.session_state.chat_history = []
+            if "vector_store_ready" in st.session_state:
+                del st.session_state.vector_store_ready
+            if "chunk_count" in st.session_state:
+                del st.session_state.chunk_count
+            st.rerun()
+        st.markdown('</div>', unsafe_allow_html=True)
+
+# Feedback section
+if st.session_state.chat_history:
+    st.markdown("---")
+    st.markdown("### ⭐ Feedback")
+    
+    col1, col2 = st.columns([2, 3])
+    
+    with col1:
+        feedback = st.radio(
+            "How was the response?",
+            ["⭐ Excellent", "👍 Good", "👎 Needs improvement"],
+            horizontal=True
+        )
+    
+    with col2:
+        if feedback:
+            st.success(f"✅ Thank you for the feedback: {feedback}")
+
+# Footer
+st.markdown("---")
+st.markdown(
+    """
+    <div style='text-align: center; color: #ffffff; padding: 2rem; background: linear-gradient(135deg, #ff5722 0%, #f4511e 50%, #d84315 100%); border-radius: 15px; margin-top: 2rem; box-shadow: 0 8px 30px rgba(255, 87, 34, 0.3); position: relative; overflow: hidden;'>
+        <div style='position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%); pointer-events: none;'></div>
+        <h3 style='margin: 0; font-size: 1.8rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); position: relative; z-index: 1;'>📄 AI PDF Chatbot</h3>
+        <p style='font-size: 1.1rem; margin: 1rem 0; font-weight: 500; position: relative; z-index: 1;'>
+            <strong>Upload PDF → Ask Questions → Get Intelligent Answers</strong>
+        </p>
+        <p style='font-size: 0.95rem; opacity: 0.9; margin: 0; position: relative; z-index: 1;'>
+            Experience next-generation document analysis with professional AI assistance
+        </p>
+    </div>
+    """, 
+    unsafe_allow_html=True)
