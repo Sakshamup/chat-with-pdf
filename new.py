@@ -387,6 +387,15 @@ with st.sidebar:
         help="Translate AI responses to your selected language"
     )
     
+    # Show translation status
+    if translate_responses:
+        if language == "English":
+            st.info("ℹ️ Translation disabled for English")
+        else:
+            st.success(f"🌐 Will translate to {language}")
+    else:
+        st.info("🔤 Responses will be in English")
+    
 
     
     # Status indicator with bright colors
@@ -677,19 +686,50 @@ def process_user_message(user_input):
 def translate_text(text, target_language):
     """Translate text to target language using Google Translate"""
     try:
+        # Initialize translator
         translator = Translator()
-        if target_language == "en":  # Don't translate if English
+        
+        # Don't translate if target is English
+        if target_language == "en":
             return text
         
-        # Detect if text is already in target language
-        detected = translator.detect(text)
-        if detected.lang == target_language:
+        # Clean the text first
+        text_to_translate = text.strip()
+        if not text_to_translate:
             return text
             
-        translated = translator.translate(text, dest=target_language)
-        return translated.text
+        # Show what we're translating (for debugging)
+        st.write(f"🔄 Translating from detected language to {target_language}")
+        st.write(f"📝 Original text preview: {text_to_translate[:100]}...")
+        
+        # Detect source language
+        try:
+            detected = translator.detect(text_to_translate)
+            st.write(f"🔍 Detected language: {detected.lang} (confidence: {detected.confidence:.2f})")
+            
+            # Don't translate if already in target language
+            if detected.lang == target_language:
+                st.info(f"ℹ️ Text is already in {target_language}")
+                return text
+        except Exception as detect_error:
+            st.warning(f"⚠️ Language detection failed: {detect_error}. Proceeding with translation...")
+            
+        # Perform translation
+        st.write(f"🌐 Translating to {target_language}...")
+        translated = translator.translate(text_to_translate, dest=target_language)
+        
+        if translated and translated.text:
+            translated_text = translated.text.strip()
+            st.write(f"✅ Translation successful!")
+            st.write(f"📝 Translated preview: {translated_text[:100]}...")
+            return translated_text
+        else:
+            st.error("❌ Translation returned empty result")
+            return text
+            
     except Exception as e:
-        st.error(f"Translation failed: {str(e)}")
+        st.error(f"❌ Translation error: {str(e)}")
+        st.error("🔧 Please check your internet connection and try again.")
         return text
 
 # Initialize chat history
@@ -742,15 +782,23 @@ if ask_button and user_input:
     if "vector_store_ready" not in st.session_state:
         st.warning("⚠️ Please upload and process a PDF first!")
     else:
+        # Get the original response
         response = process_user_message(user_input)
         
-        # Translate response if enabled
+        # Check if translation is enabled and language is not English
         if translate_responses and language != "English":
             target_lang = LANGUAGE_MAPPING[language]["translate"]
             with st.spinner(f"🔄 Translating to {language}..."):
-                translated_response = translate_text(response, target_lang)
-                st.session_state.chat_history.append((user_input, translated_response))
+                try:
+                    translated_response = translate_text(response, target_lang)
+                    st.session_state.chat_history.append((user_input, translated_response))
+                    # Show translation confirmation
+                    st.success(f"✅ Response translated to {language}")
+                except Exception as trans_error:
+                    st.warning(f"⚠️ Translation failed: {str(trans_error)}. Showing original response.")
+                    st.session_state.chat_history.append((user_input, response))
         else:
+            # Store original response
             st.session_state.chat_history.append((user_input, response))
 
 # Display chat history with bright styling
@@ -766,9 +814,14 @@ if st.session_state.chat_history:
         ''', unsafe_allow_html=True)
         
         # Bot message with bright styling
+        # Show translation status if applicable
+        translation_note = ""
+        if translate_responses and language != "English":
+            translation_note = f" (Translated to {language})"
+            
         st.markdown(f'''
         <div class="bot-message">
-            <strong>🤖✨ AI Magic Response:</strong> {answer}
+            <strong>🤖✨ AI Magic Response{translation_note}:</strong> {answer}
         </div>
         ''', unsafe_allow_html=True)
         
