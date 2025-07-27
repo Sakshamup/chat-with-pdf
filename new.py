@@ -603,80 +603,148 @@ def enhance_query(query):
     return " ".join(enhanced_terms)
 
 def process_user_message(user_input):
-    """Process user message with enhanced error handling"""
+    """Process user message with enhanced error handling and debugging"""
     try:
         with st.spinner("🤔 Thinking with enhanced intelligence..."):
             # Check if vector store exists
             if not os.path.exists("faiss_index"):
                 return "❌ Vector store not found. Please upload and process a PDF first."
             
+            # Debug: Check what files exist
+            st.write("🔍 Debug: Checking vector store files...")
+            faiss_files = []
+            for file in os.listdir("faiss_index"):
+                faiss_files.append(file)
+                st.write(f"   📁 Found: {file}")
+            
+            if not faiss_files:
+                return "❌ Vector store directory is empty. Please reprocess your PDF."
+            
             # Initialize embeddings
-            embeddings = GoogleGenerativeAIEmbeddings(
-                model="models/embedding-001",
-                google_api_key=os.getenv("GOOGLE_API_KEY")
-            )
+            st.write("🧠 Initializing embeddings...")
+            try:
+                embeddings = GoogleGenerativeAIEmbeddings(
+                    model="models/embedding-001",
+                    google_api_key=os.getenv("GOOGLE_API_KEY")
+                )
+                st.write("✅ Embeddings initialized successfully")
+            except Exception as emb_error:
+                return f"❌ Error initializing embeddings: {str(emb_error)}"
             
             # Load vector store
+            st.write("📚 Loading vector store...")
             try:
                 vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+                st.write("✅ Vector store loaded successfully")
+                
+                # Debug: Check vector store info
+                if hasattr(vector_store, 'index') and hasattr(vector_store.index, 'ntotal'):
+                    total_vectors = vector_store.index.ntotal
+                    st.write(f"📊 Vector store contains {total_vectors} vectors")
+                    
+                    if total_vectors == 0:
+                        return "❌ Vector store is empty. Please reprocess your PDF."
+                        
             except Exception as load_error:
+                st.write(f"❌ Vector store loading error: {str(load_error)}")
                 return f"❌ Error loading vector store: {str(load_error)}. Please reprocess your PDF."
             
-            # Enhanced query
+            # Enhanced query processing
+            st.write(f"🔍 Searching for: '{user_input}'")
             enhanced_query = enhance_query(user_input)
+            st.write(f"🔍 Enhanced query: '{enhanced_query}'")
             
-            # Get more documents for better context (fixed at 6)
+            # Get documents with debugging
             num_docs = 6
-            docs = vector_store.similarity_search(enhanced_query, k=num_docs)
+            try:
+                docs = vector_store.similarity_search(enhanced_query, k=num_docs)
+                st.write(f"📄 Found {len(docs)} documents from enhanced search")
+                
+                # Show snippet of found documents for debugging
+                for i, doc in enumerate(docs[:2]):  # Show first 2 docs
+                    snippet = doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content
+                    st.write(f"   📝 Doc {i+1}: {snippet}")
+                
+            except Exception as search_error:
+                st.write(f"❌ Search error: {str(search_error)}")
+                return f"❌ Error searching documents: {str(search_error)}"
         
             # Also try with the original query if enhanced query doesn't yield good results
             if len(docs) < num_docs:
-                additional_docs = vector_store.similarity_search(user_input, k=num_docs)
-                # Combine and deduplicate
-                all_docs = docs + additional_docs
-                seen_content = set()
-                unique_docs = []
-                for doc in all_docs:
-                    if doc.page_content not in seen_content:
-                        unique_docs.append(doc)
-                        seen_content.add(doc.page_content)
-                docs = unique_docs[:num_docs]
+                st.write("🔍 Trying original query...")
+                try:
+                    additional_docs = vector_store.similarity_search(user_input, k=num_docs)
+                    st.write(f"📄 Found {len(additional_docs)} additional documents")
+                    
+                    # Combine and deduplicate
+                    all_docs = docs + additional_docs
+                    seen_content = set()
+                    unique_docs = []
+                    for doc in all_docs:
+                        if doc.page_content not in seen_content:
+                            unique_docs.append(doc)
+                            seen_content.add(doc.page_content)
+                    docs = unique_docs[:num_docs]
+                    st.write(f"📄 Total unique documents: {len(docs)}")
+                except Exception as additional_search_error:
+                    st.write(f"⚠️ Additional search failed: {str(additional_search_error)}")
             
             # If still no good matches, try with more relaxed search
             if len(docs) < 3:
-                # Try searching with individual words from the query
+                st.write("🔍 Trying word-by-word search...")
                 words = user_input.split()
                 for word in words:
                     if len(word) > 3:  # Only search meaningful words
-                        word_docs = vector_store.similarity_search(word, k=2)
-                        docs.extend(word_docs)
+                        try:
+                            word_docs = vector_store.similarity_search(word, k=2)
+                            docs.extend(word_docs)
+                            st.write(f"   🔤 Word '{word}': found {len(word_docs)} docs")
+                        except Exception as word_search_error:
+                            st.write(f"   ⚠️ Word search failed for '{word}': {str(word_search_error)}")
+            
+            # Final document count
+            st.write(f"📚 Using {len(docs)} documents for answer generation")
+            
+            if not docs:
+                return "❌ No relevant documents found. Please try rephrasing your question or check if your PDF was processed correctly."
             
             # Get conversational chain
+            st.write("🤖 Initializing AI chain...")
             chain = get_conversational_chain()
             if not chain:
                 return "❌ Error initializing AI model. Please check your API configuration."
             
+            st.write("✅ AI chain ready")
+            
             try:
+                st.write("🧠 Generating answer...")
                 response = chain({"input_documents": docs, "question": user_input}, return_only_outputs=True)
                 answer = response["output_text"]
                 
+                st.write(f"📝 Generated answer length: {len(answer)} characters")
+                
                 # If we still get a "not available" response, try a fallback approach
                 if "not available in the context" in answer.lower() or "cannot find" in answer.lower():
+                    st.write("🔄 Trying fallback approach...")
                     # Try a more general search
-                    general_docs = vector_store.similarity_search(user_input, k=10)
-                    if general_docs:
-                        fallback_response = chain({"input_documents": general_docs, "question": f"Based on the available information, what can you tell me about: {user_input}"}, return_only_outputs=True)
-                        fallback_answer = fallback_response["output_text"]
-                        if "not available" not in fallback_answer.lower():
-                            answer = fallback_answer
+                    try:
+                        general_docs = vector_store.similarity_search(user_input, k=10)
+                        if general_docs:
+                            fallback_response = chain({"input_documents": general_docs, "question": f"Based on the available information, what can you tell me about: {user_input}"}, return_only_outputs=True)
+                            fallback_answer = fallback_response["output_text"]
+                            if "not available" not in fallback_answer.lower():
+                                answer = fallback_answer
+                                st.write("✅ Fallback approach succeeded")
+                    except Exception as fallback_error:
+                        st.write(f"⚠️ Fallback approach failed: {str(fallback_error)}")
                 
                 return answer
                 
             except Exception as chain_error:
-                return f"❌ Error processing question: {str(chain_error)}"
+                return f"❌ Error processing question with AI: {str(chain_error)}"
                 
     except Exception as e:
-        return f"❌ Critical error: {str(e)}"
+        return f"❌ Critical error in process_user_message: {str(e)}"
 
 def translate_text(text, target_language):
     """Translate text to target language using Google Translate with multiple fallback methods"""
