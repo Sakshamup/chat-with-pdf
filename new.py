@@ -39,6 +39,8 @@ try:
         st.stop()
     
     genai.configure(api_key=api_key)
+    # Remove the success message that creates unwanted box
+    # st.success("✅ Google API configured successfully!")
 except Exception as e:
     st.error(f"🚨 API Configuration Error: {str(e)}")
     st.stop()
@@ -186,22 +188,7 @@ st.markdown("""
         letter-spacing: 0.2px;
     }
     
-    .upload-section::before {
-        content: '';
-        position: absolute;
-        top: -50%;
-        left: -50%;
-        width: 200%;
-        height: 200%;
-        background: linear-gradient(45deg, transparent, rgba(255, 87, 34, 0.1), transparent);
-        transform: rotate(45deg);
-        animation: shimmer 3s infinite;
-    }
-    
-    @keyframes shimmer {
-        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
-        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
-    }
+    /* Removed shimmer animation that was creating empty box */
     
     .user-message {
         font-family: var(--font-secondary);
