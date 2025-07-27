@@ -427,9 +427,8 @@ uploaded_files = st.file_uploader(
 )
 st.markdown('</div>', unsafe_allow_html=True)
 
-@st.cache_data
 def extract_text_from_pdfs(files):
-    """Extract text from uploaded PDF files"""
+    """Extract text from uploaded PDF files - NO CACHE"""
     text = ""
     total_pages = 0
     
@@ -485,12 +484,11 @@ def preprocess_text(text):
     text = text.strip()
     return text
 
-@st.cache_data
 def create_vector_store(text):
-    """Create FAISS vector store from text"""
+    """Create FAISS vector store from text - REMOVED CACHE DECORATOR"""
     if not text or not text.strip():
         st.error("❌ No text provided for vector store creation!")
-        return False
+        return 0
         
     try:
         with st.spinner("🔄 Creating AI embeddings... This may take a moment"):
@@ -510,7 +508,7 @@ def create_vector_store(text):
             
             if not text_chunks:
                 st.error("❌ No valid text chunks created! Please check your PDF content.")
-                return False
+                return 0
                 
             st.write(f"✅ Created {len(text_chunks)} text chunks")
             
@@ -528,20 +526,17 @@ def create_vector_store(text):
                 st.write("💾 Saving vector store...")
                 vector_store.save_local("faiss_index")
                 
-                # Store chunk count for debugging
-                st.session_state.chunk_count = len(text_chunks)
-                st.session_state.vector_store_ready = True
-                
-                return True
+                # Return the actual chunk count
+                return len(text_chunks)
                 
             except Exception as embedding_error:
                 st.error(f"❌ Error creating embeddings: {str(embedding_error)}")
                 st.error("🔍 This might be due to API key issues or network problems.")
-                return False
+                return 0
                 
     except Exception as e:
         st.error(f"❌ Error in vector store creation: {str(e)}")
-        return False
+        return 0
 
 def get_conversational_chain():
     """Create conversational chain with error handling"""
@@ -748,11 +743,14 @@ if uploaded_files:
         processed_text = preprocess_text(raw_text)
         
         if processed_text:
-            # Create vector store
-            success = create_vector_store(processed_text)
+            # Create vector store and get chunk count
+            chunk_count = create_vector_store(processed_text)
             
-            if success:
-                st.success(f"🎉✨ PDFs processed successfully! Created {st.session_state.get('chunk_count', 0)} searchable chunks! ✨🎉")
+            if chunk_count > 0:
+                # Store the chunk count and set ready flag
+                st.session_state.chunk_count = chunk_count
+                st.session_state.vector_store_ready = True
+                st.success(f"🎉✨ PDFs processed successfully! Created {chunk_count} searchable chunks! ✨🎉")
                 st.balloons()
             else:
                 st.error("❌ Failed to create vector store. Please try again or check your API configuration.")
@@ -876,6 +874,8 @@ if st.session_state.chat_history:
             st.session_state.chat_history = []
             if "vector_store_ready" in st.session_state:
                 del st.session_state.vector_store_ready
+            if "chunk_count" in st.session_state:
+                del st.session_state.chunk_count
             st.snow()  # Fun animation!
             st.rerun()
         st.markdown('</div>', unsafe_allow_html=True)
