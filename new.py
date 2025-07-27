@@ -57,27 +57,28 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Professional Red-Orange CSS Theme
+# Professional Teal-Pink CSS Theme
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Main app background - Professional red-orange gradient */
+    /* Main app background - Professional teal gradient */
     .stApp {
-        background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 25%, #4a1810 50%, #6b2c17 75%, #8b3a1e 100%);
+        background: linear-gradient(135deg, #f0fdfc 0%, #e6fffa 25%, #ccfbf1 50%, #99f6e4 75%, #5eead4 100%);
         font-family: 'Inter', sans-serif;
+        min-height: 100vh;
     }
     
     /* Main page container with sophisticated glass effect */
     .main .block-container {
-        background: rgba(255, 255, 255, 0.05);
+        background: rgba(255, 237, 243, 0.8);
         backdrop-filter: blur(20px);
         border-radius: 20px;
-        border: 1px solid rgba(255, 87, 34, 0.2);
+        border: 1px solid rgba(10, 186, 181, 0.2);
         padding: 2.5rem;
         margin: 1rem;
-        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 
-                    0 0 0 1px rgba(255, 87, 34, 0.1);
+        box-shadow: 0 25px 50px rgba(10, 186, 181, 0.15), 
+                    0 0 0 1px rgba(10, 186, 181, 0.1);
         position: relative;
     }
     
@@ -89,8 +90,8 @@ st.markdown("""
         left: 0;
         right: 0;
         bottom: 0;
-        background: radial-gradient(circle at 20% 80%, rgba(244, 67, 54, 0.1) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(255, 87, 34, 0.1) 0%, transparent 50%);
+        background: radial-gradient(circle at 20% 80%, rgba(10, 186, 181, 0.08) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 237, 243, 0.3) 0%, transparent 50%);
         border-radius: 20px;
         pointer-events: none;
         z-index: -1;
@@ -99,37 +100,37 @@ st.markdown("""
     .main-header {
         font-size: 3rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #ff5722 0%, #f44336 50%, #d32f2f 100%);
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 50%, #047481 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         text-align: center;
         margin-bottom: 0.5rem;
-        text-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+        text-shadow: 0 4px 8px rgba(10, 186, 181, 0.2);
         letter-spacing: -0.02em;
     }
     
     .sub-header {
         text-align: center;
-        color: #ffffff;
+        color: #065f5c;
         margin-bottom: 2rem;
         font-size: 1.2rem;
-        font-weight: 400;
-        background: rgba(255, 87, 34, 0.1);
+        font-weight: 500;
+        background: rgba(255, 237, 243, 0.9);
         padding: 1.2rem 2rem;
         border-radius: 15px;
         backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 87, 34, 0.2);
-        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.1);
+        border: 1px solid rgba(10, 186, 181, 0.2);
+        box-shadow: 0 8px 25px rgba(10, 186, 181, 0.1);
     }
     
     .upload-section {
-        background: linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.9) 0%, rgba(10, 186, 181, 0.08) 100%);
         padding: 2rem;
         border-radius: 16px;
-        border: 2px dashed rgba(255, 87, 34, 0.4);
+        border: 2px dashed rgba(10, 186, 181, 0.4);
         margin: 1.5rem 0;
-        box-shadow: 0 8px 30px rgba(255, 87, 34, 0.15);
+        box-shadow: 0 8px 30px rgba(10, 186, 181, 0.15);
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
@@ -142,7 +143,7 @@ st.markdown("""
         left: -50%;
         width: 200%;
         height: 200%;
-        background: linear-gradient(45deg, transparent, rgba(255, 87, 34, 0.1), transparent);
+        background: linear-gradient(45deg, transparent, rgba(10, 186, 181, 0.1), transparent);
         transform: rotate(45deg);
         animation: shimmer 3s infinite;
     }
@@ -153,13 +154,13 @@ st.markdown("""
     }
     
     .user-message {
-        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 100%);
         color: white;
         padding: 1.2rem 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
-        border-left: 4px solid #d84315;
-        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.3);
+        border-left: 4px solid #047481;
+        box-shadow: 0 8px 25px rgba(10, 186, 181, 0.3);
         font-weight: 500;
         position: relative;
         overflow: hidden;
@@ -172,7 +173,7 @@ st.markdown("""
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.15), transparent);
         transform: translateX(-100%);
         transition: transform 0.6s;
     }
@@ -182,13 +183,13 @@ st.markdown("""
     }
     
     .bot-message {
-        background: linear-gradient(135deg, #bf360c 0%, #d84315 100%);
-        color: white;
+        background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
+        color: #7c2d92;
         padding: 1.2rem 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
-        border-left: 4px solid #8d2a0e;
-        box-shadow: 0 8px 25px rgba(191, 54, 12, 0.3);
+        border-left: 4px solid #0ABAB5;
+        box-shadow: 0 8px 25px rgba(255, 237, 243, 0.5);
         font-weight: 500;
         position: relative;
         overflow: hidden;
@@ -201,7 +202,7 @@ st.markdown("""
         left: 0;
         right: 0;
         bottom: 0;
-        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        background: linear-gradient(45deg, transparent, rgba(10, 186, 181, 0.05), transparent);
         transform: translateX(-100%);
         transition: transform 0.6s;
     }
@@ -212,11 +213,11 @@ st.markdown("""
     
     /* Professional Sidebar */
     .css-1d391kg, .css-18e3th9, section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 24, 16, 0.95) 50%, rgba(74, 24, 16, 0.95) 100%);
+        background: linear-gradient(180deg, rgba(255, 237, 243, 0.95) 0%, rgba(10, 186, 181, 0.1) 50%, rgba(255, 237, 243, 0.95) 100%);
         backdrop-filter: blur(20px);
         border-radius: 15px;
-        border: 1px solid rgba(255, 87, 34, 0.2);
-        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(10, 186, 181, 0.2);
+        box-shadow: 0 15px 35px rgba(10, 186, 181, 0.15);
     }
     
     .css-1d391kg > div {
@@ -224,17 +225,19 @@ st.markdown("""
     }
     
     .feature-box {
-        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.15) 100%);
         padding: 1.5rem;
         border-radius: 12px;
-        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
+        box-shadow: 0 6px 20px rgba(10, 186, 181, 0.15);
         margin: 0.8rem 0;
         text-align: center;
-        border: 1px solid rgba(255, 87, 34, 0.25);
+        border: 1px solid rgba(10, 186, 181, 0.25);
         backdrop-filter: blur(15px);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
+        color: #065f5c;
+        font-weight: 500;
     }
     
     .feature-box::before {
@@ -244,15 +247,15 @@ st.markdown("""
         left: -100%;
         width: 100%;
         height: 100%;
-        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        background: linear-gradient(90deg, transparent, rgba(10, 186, 181, 0.2), transparent);
         transition: left 0.5s;
     }
     
     .feature-box:hover {
         transform: translateY(-3px) scale(1.02);
-        box-shadow: 0 12px 30px rgba(255, 87, 34, 0.25);
-        background: linear-gradient(135deg, rgba(255, 87, 34, 0.25) 0%, rgba(244, 67, 54, 0.2) 100%);
-        border-color: rgba(255, 87, 34, 0.4);
+        box-shadow: 0 12px 30px rgba(10, 186, 181, 0.25);
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.9) 0%, rgba(10, 186, 181, 0.2) 100%);
+        border-color: rgba(10, 186, 181, 0.4);
     }
     
     .feature-box:hover::before {
@@ -261,14 +264,14 @@ st.markdown("""
     
     /* Professional Button Styling */
     .stButton > button {
-        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 100%);
         color: white;
         border: none;
         border-radius: 12px;
         padding: 0.8rem 2rem;
         font-weight: 600;
         font-size: 0.95rem;
-        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.3);
+        box-shadow: 0 6px 20px rgba(10, 186, 181, 0.3);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
@@ -288,8 +291,8 @@ st.markdown("""
     
     .stButton > button:hover {
         transform: translateY(-2px);
-        box-shadow: 0 10px 30px rgba(255, 87, 34, 0.4);
-        background: linear-gradient(135deg, #f4511e 0%, #d84315 100%);
+        box-shadow: 0 10px 30px rgba(10, 186, 181, 0.4);
+        background: linear-gradient(135deg, #06a19b 0%, #047481 100%);
     }
     
     .stButton > button:hover::before {
@@ -298,16 +301,16 @@ st.markdown("""
     
     .stButton > button:active {
         transform: translateY(0px);
-        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+        box-shadow: 0 4px 15px rgba(10, 186, 181, 0.3);
     }
     
     /* Enhanced Input Field Styling */
     .stTextInput > div > div > input {
         border-radius: 12px;
-        border: 2px solid rgba(255, 87, 34, 0.3);
+        border: 2px solid rgba(10, 186, 181, 0.3);
         padding: 0.8rem 1.2rem;
-        background: rgba(255, 255, 255, 0.1);
-        color: #ffffff;
+        background: rgba(255, 237, 243, 0.5);
+        color: #065f5c;
         font-size: 1rem;
         font-weight: 500;
         backdrop-filter: blur(10px);
@@ -315,10 +318,149 @@ st.markdown("""
     }
     
     .stTextInput > div > div > input::placeholder {
-        color: rgba(255, 255, 255, 0.6);
+        color: rgba(6, 95, 92, 0.6);
     }
     
     .stTextInput > div > div > input:focus {
+        border-color: #0ABAB5;
+        box-shadow: 0 0 20px rgba(10, 186, 181, 0.3);
+        background: rgba(255, 237, 243, 0.8);
+        outline: none;
+    }
+    
+    /* Professional Section Headers */
+    h3 {
+        color: #065f5c;
+        font-weight: 600;
+        font-size: 1.3rem;
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.9) 0%, rgba(10, 186, 181, 0.1) 100%);
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(10, 186, 181, 0.25);
+        box-shadow: 0 4px 15px rgba(10, 186, 181, 0.1);
+        margin-bottom: 1rem;
+    }
+    
+    /* Radio button container */
+    .stRadio > div {
+        background: rgba(255, 237, 243, 0.6);
+        padding: 1.2rem;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(10, 186, 181, 0.2);
+        box-shadow: 0 4px 15px rgba(10, 186, 181, 0.1);
+        color: #065f5c;
+    }
+    
+    /* Metrics styling */
+    .css-1r6slb0 {
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.1) 100%);
+        border-radius: 12px;
+        padding: 1.2rem;
+        box-shadow: 0 6px 20px rgba(10, 186, 181, 0.15);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(10, 186, 181, 0.2);
+        color: #065f5c;
+    }
+    
+    /* Enhanced File uploader styling */
+    .css-1cpxqw2, 
+    section[data-testid="stFileUploader"],
+    .css-1cpxqw2 > div,
+    div[data-testid="stFileUploader"] {
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.6) 0%, rgba(10, 186, 181, 0.08) 100%) !important;
+        border-radius: 16px !important;
+        border: 2px dashed rgba(10, 186, 181, 0.4) !important;
+        padding: 2rem !important;
+        box-shadow: 0 8px 25px rgba(10, 186, 181, 0.15) !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+    }
+    
+    div[data-testid="stFileUploader"]:hover {
+        border-color: rgba(10, 186, 181, 0.6) !important;
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.15) 100%) !important;
+        transform: translateY(-2px) !important;
+    }
+    
+    /* File uploader text styling */
+    div[data-testid="stFileUploader"] label,
+    div[data-testid="stFileUploader"] p,
+    div[data-testid="stFileUploader"] small {
+        color: #065f5c !important;
+        font-weight: 500 !important;
+    }
+    
+    /* Browse files button styling */
+    div[data-testid="stFileUploader"] button {
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.8rem 1.8rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 6px 20px rgba(10, 186, 181, 0.3) !important;
+        transition: all 0.3s ease !important;
+    }
+    
+    div[data-testid="stFileUploader"] button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(10, 186, 181, 0.4) !important;
+        background: linear-gradient(135deg, #06a19b 0%, #047481 100%) !important;
+    }
+    
+    /* File upload icon styling */
+    div[data-testid="stFileUploader"] svg {
+        color: #0ABAB5 !important;
+        filter: drop-shadow(0 2px 4px rgba(10, 186, 181, 0.3)) !important;
+    }
+    
+    /* Sidebar content styling */
+    .css-18e3th9 {
+        background: transparent !important;
+        padding: 1.2rem;
+        border-radius: 15px;
+    }
+    
+    /* Sidebar text styling */
+    section[data-testid="stSidebar"] h3 {
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.15) 100%);
+        padding: 0.8rem 1.2rem;
+        border-radius: 10px;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(10, 186, 181, 0.25);
+        color: #065f5c;
+        box-shadow: 0 4px 15px rgba(10, 186, 181, 0.1);
+    }
+    
+    /* Sidebar metrics styling */
+    section[data-testid="stSidebar"] .css-1r6slb0 {
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.1) 100%);
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 4px 15px rgba(10, 186, 181, 0.1);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(10, 186, 181, 0.2);
+        color: #065f5c;
+    }
+    
+    /* Sidebar info box styling */
+    section[data-testid="stSidebar"] .stAlert {
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.15) 100%);
+        color: #065f5c;
+        border-radius: 10px;
+        border: 1px solid rgba(10, 186, 181, 0.25);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 4px 15px rgba(10, 186, 181, 0.1);
+    }
+    
+    /* Sidebar markdown text */
+    section[data-testid="stSidebar"] p, 
+    section[data-testid="stSidebar"] .stMarkdown {
+        color: #065f5c;
+        font-weight: 400;
+    } > div > input:focus {
         border-color: #ff5722;
         box-shadow: 0 0 20px rgba(255, 87, 34, 0.3);
         background: rgba(255, 255, 255, 0.15);
@@ -458,27 +600,27 @@ st.markdown("""
 
     /* Enhanced Success, Error, and Warning messages */
     .stSuccess {
-        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 100%);
         color: white;
         border-radius: 12px;
-        border: 1px solid rgba(76, 175, 80, 0.3);
-        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.2);
+        border: 1px solid rgba(10, 186, 181, 0.3);
+        box-shadow: 0 6px 20px rgba(10, 186, 181, 0.2);
     }
     
     .stError {
-        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
         color: white;
         border-radius: 12px;
-        border: 1px solid rgba(244, 67, 54, 0.3);
-        box-shadow: 0 6px 20px rgba(244, 67, 54, 0.2);
+        border: 1px solid rgba(239, 68, 68, 0.3);
+        box-shadow: 0 6px 20px rgba(239, 68, 68, 0.2);
     }
     
     .stWarning {
-        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
         color: white;
         border-radius: 12px;
-        border: 1px solid rgba(255, 152, 0, 0.3);
-        box-shadow: 0 6px 20px rgba(255, 152, 0, 0.2);
+        border: 1px solid rgba(245, 158, 11, 0.3);
+        box-shadow: 0 6px 20px rgba(245, 158, 11, 0.2);
     }
     
     /* Custom scrollbar */
@@ -488,23 +630,156 @@ st.markdown("""
     }
     
     ::-webkit-scrollbar-track {
-        background: rgba(255, 87, 34, 0.1);
+        background: rgba(10, 186, 181, 0.1);
         border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb {
-        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 100%);
         border-radius: 4px;
     }
     
     ::-webkit-scrollbar-thumb:hover {
-        background: linear-gradient(135deg, #f4511e 0%, #d84315 100%);
+        background: linear-gradient(135deg, #06a19b 0%, #047481 100%);
     }
     
     /* Loading spinner animation */
     @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
+    }
+    
+    /* Selection styling */
+    ::selection {
+        background: rgba(10, 186, 181, 0.3);
+        color: #065f5c;
+    }
+    
+    ::-moz-selection {
+        background: rgba(10, 186, 181, 0.3);
+        color: #065f5c;
+    }
+    
+    /* Selectbox styling */
+    .stSelectbox > div > div {
+        background: rgba(255, 237, 243, 0.8);
+        border: 2px solid rgba(10, 186, 181, 0.3);
+        border-radius: 12px;
+        color: #065f5c;
+    }
+    
+    .stSelectbox > div > div:focus-within {
+        border-color: #0ABAB5;
+        box-shadow: 0 0 15px rgba(10, 186, 181, 0.2);
+    }
+    
+    /* Dropdown options */
+    .stSelectbox div[data-baseweb="select"] > div {
+        background: rgba(255, 237, 243, 0.95);
+        color: #065f5c;
+    }
+    
+    /* Progress bar */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 100%);
+    }
+    
+    /* Metric styling */
+    div[data-testid="metric-container"] {
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.1) 100%);
+        border: 1px solid rgba(10, 186, 181, 0.2);
+        border-radius: 12px;
+        padding: 1rem;
+        backdrop-filter: blur(10px);
+        color: #065f5c;
+    }
+    
+    div[data-testid="metric-container"] > label {
+        color: #065f5c !important;
+        font-weight: 500;
+    }
+    
+    div[data-testid="metric-container"] > div {
+        color: #0ABAB5 !important;
+        font-weight: 600;
+    }
+    
+    /* Tab styling */
+    .stTabs [data-baseweb="tab-list"] {
+        background: rgba(255, 237, 243, 0.8);
+        border-radius: 12px;
+        border: 1px solid rgba(10, 186, 181, 0.2);
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        color: #065f5c;
+        font-weight: 500;
+    }
+    
+    .stTabs [aria-selected="true"] {
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 100%);
+        color: white !important;
+    }
+    
+    /* Download button special styling */
+    .stDownloadButton > button {
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.9) 0%, rgba(10, 186, 181, 0.2) 100%);
+        color: #065f5c;
+        border: 2px solid rgba(10, 186, 181, 0.3);
+        border-radius: 10px;
+        font-weight: 600;
+        transition: all 0.3s ease;
+    }
+    
+    .stDownloadButton > button:hover {
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 100%);
+        color: white;
+        transform: translateY(-2px);
+        box-shadow: 0 8px 25px rgba(10, 186, 181, 0.3);
+    }
+    
+    /* Footer enhancement */
+    .footer-container {
+        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 50%, #047481 100%);
+        color: white;
+        padding: 2rem;
+        border-radius: 15px;
+        margin-top: 2rem;
+        box-shadow: 0 8px 30px rgba(10, 186, 181, 0.3);
+        position: relative;
+        overflow: hidden;
+        text-align: center;
+    }
+    
+    .footer-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 30% 70%, rgba(255, 237, 243, 0.1) 0%, transparent 50%);
+        pointer-events: none;
+    }
+    
+    .footer-container h3 {
+        margin: 0;
+        font-size: 1.8rem;
+        font-weight: 700;
+        text-shadow: 2px 2px 4px rgba(0,0,0,0.2);
+        position: relative;
+        z-index: 1;
+        background: none;
+        color: white;
+        border: none;
+        box-shadow: none;
+        padding: 0;
+    }
+    
+    .footer-container p {
+        position: relative;
+        z-index: 1;
+        margin: 1rem 0;
     }
     
     /* Responsive design improvements */
@@ -525,6 +800,45 @@ st.markdown("""
         .feature-box {
             padding: 1.2rem;
         }
+        
+        .main .block-container {
+            padding: 1.5rem;
+            margin: 0.5rem;
+        }
+    }
+    
+    /* Additional professional touches */
+    .stMarkdown {
+        color: #065f5c;
+    }
+    
+    /* Code block styling */
+    .stCode {
+        background: rgba(255, 237, 243, 0.6);
+        border: 1px solid rgba(10, 186, 181, 0.2);
+        border-radius: 8px;
+        color: #065f5c;
+    }
+    
+    /* Alert styling */
+    .stAlert {
+        border-radius: 12px;
+        backdrop-filter: blur(10px);
+    }
+    
+    /* Expander styling */
+    .streamlit-expanderHeader {
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.1) 100%);
+        color: #065f5c;
+        border-radius: 10px;
+        border: 1px solid rgba(10, 186, 181, 0.2);
+    }
+    
+    .streamlit-expanderContent {
+        background: rgba(255, 237, 243, 0.4);
+        border: 1px solid rgba(10, 186, 181, 0.15);
+        border-radius: 0 0 10px 10px;
+        color: #065f5c;
     }
 </style>
 """, unsafe_allow_html=True)
@@ -964,14 +1278,13 @@ if st.session_state.chat_history:
 st.markdown("---")
 st.markdown(
     """
-    <div style='text-align: center; color: #ffffff; padding: 2rem; background: linear-gradient(135deg, #ff5722 0%, #f4511e 50%, #d84315 100%); border-radius: 15px; margin-top: 2rem; box-shadow: 0 8px 30px rgba(255, 87, 34, 0.3); position: relative; overflow: hidden;'>
-        <div style='position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%); pointer-events: none;'></div>
-        <h3 style='margin: 0; font-size: 1.8rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); position: relative; z-index: 1;'>📄 AI PDF Chatbot</h3>
-        <p style='font-size: 1.1rem; margin: 1rem 0; font-weight: 500; position: relative; z-index: 1;'>
+    <div class="footer-container">
+        <h3>📄 AI PDF Chatbot</h3>
+        <p style='font-size: 1.1rem; margin: 1rem 0; font-weight: 500;'>
             <strong>Upload PDF → Ask Questions → Get Intelligent Answers</strong>
         </p>
-        <p style='font-size: 0.95rem; opacity: 0.9; margin: 0; position: relative; z-index: 1;'>
-            Experience next-generation document analysis with professional AI assistance
+        <p style='font-size: 0.95rem; opacity: 0.9; margin: 0;'>
+            Experience next-generation document analysis with modern AI assistance
         </p>
     </div>
     """, 
