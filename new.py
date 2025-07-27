@@ -681,8 +681,8 @@ def process_user_message(user_input):
 def translate_text(text, target_language):
     """Translate text to target language using Google Translate"""
     try:
-        # Initialize translator
-        translator = Translator()
+        # Initialize translator with a specific service URL to avoid issues
+        translator = Translator(service_urls=['translate.google.com'])
         
         # Don't translate if target is English
         if target_language == "en":
@@ -692,15 +692,63 @@ def translate_text(text, target_language):
         text_to_translate = text.strip()
         if not text_to_translate:
             return text
-            
-        # Perform translation silently
-        translated = translator.translate(text_to_translate, dest=target_language)
         
-        if translated and translated.text:
-            translated_text = translated.text.strip()
-            return translated_text
+        # Split long text into smaller chunks if needed (Google Translate has limits)
+        max_length = 4500  # Safe limit for Google Translate
+        if len(text_to_translate) > max_length:
+            # Split text into sentences and translate in chunks
+            sentences = text_to_translate.split('. ')
+            translated_sentences = []
+            current_chunk = ""
+            
+            for sentence in sentences:
+                if len(current_chunk + sentence) < max_length:
+                    current_chunk += sentence + ". "
+                else:
+                    if current_chunk:
+                        try:
+                            chunk_result = translator.translate(current_chunk.strip(), dest=target_language)
+                            if hasattr(chunk_result, 'text') and chunk_result.text:
+                                translated_sentences.append(chunk_result.text)
+                            else:
+                                translated_sentences.append(current_chunk)
+                        except:
+                            translated_sentences.append(current_chunk)
+                    current_chunk = sentence + ". "
+            
+            # Translate the last chunk
+            if current_chunk:
+                try:
+                    chunk_result = translator.translate(current_chunk.strip(), dest=target_language)
+                    if hasattr(chunk_result, 'text') and chunk_result.text:
+                        translated_sentences.append(chunk_result.text)
+                    else:
+                        translated_sentences.append(current_chunk)
+                except:
+                    translated_sentences.append(current_chunk)
+            
+            return " ".join(translated_sentences)
         else:
-            return text
+            # Translate short text directly
+            try:
+                result = translator.translate(text_to_translate, dest=target_language)
+                
+                # Check if result has the expected attributes
+                if hasattr(result, 'text') and result.text:
+                    return result.text.strip()
+                else:
+                    # Fallback: try to access result differently
+                    if hasattr(result, '__dict__'):
+                        if 'text' in result.__dict__ and result.__dict__['text']:
+                            return result.__dict__['text'].strip()
+                    
+                    # If all else fails, return original text
+                    st.warning(f"⚠️ Translation completed but result format unexpected. Using original text.")
+                    return text
+                    
+            except Exception as translate_error:
+                st.warning(f"⚠️ Translation failed: {str(translate_error)}. Using original text.")
+                return text
             
     except Exception as e:
         st.error(f"❌ Translation error: {str(e)}")
@@ -781,20 +829,30 @@ if ask_button and user_input:
             
             with st.spinner(f"🔄 Translating and preparing audio in {language}..."):
                 try:
-                    # Translate the response silently
+                    # Translate the response with better error handling
                     translated_response = translate_text(response, target_lang)
                     
-                    # Store the translated response
-                    st.session_state.chat_history.append((user_input, translated_response))
-                    
-                    # Automatically speak the translated response
-                    if speak_text(translated_response, lang_code):
-                        st.success(f"🎵✨ Response translated to {language} and spoken automatically!")
+                    # Check if translation was successful (not same as original)
+                    if translated_response and translated_response != response:
+                        # Store the translated response
+                        st.session_state.chat_history.append((user_input, translated_response))
+                        
+                        # Automatically speak the translated response
+                        if speak_text(translated_response, lang_code):
+                            st.success(f"🎵✨ Response translated to {language} and spoken automatically!")
+                        else:
+                            st.warning(f"✅ Response translated to {language} but audio playback failed.")
                     else:
-                        st.warning(f"✅ Response translated to {language} but audio playback failed.")
+                        # Translation failed or returned same text, use original
+                        st.session_state.chat_history.append((user_input, response))
+                        st.warning(f"⚠️ Translation to {language} failed. Showing original English response.")
+                        
+                        # Try to speak original response in English
+                        if speak_text(response, "en"):
+                            st.info("🎵 Playing original response in English.")
                         
                 except Exception as trans_error:
-                    st.warning(f"⚠️ Translation failed: {str(trans_error)}. Showing original response.")
+                    st.warning(f"⚠️ Translation error: {str(trans_error)}. Using original response.")
                     st.session_state.chat_history.append((user_input, response))
         else:
             # Store original response
@@ -844,12 +902,14 @@ if st.session_state.chat_history:
                     lang_code = LANGUAGE_MAPPING[language]
                     
                 response_text = st.session_state.chat_history[-1][1]
-                tts = gTTS(text=response_text, lang=lang_code)
-                temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-                tts.save(temp_file.name)
-                st.audio(temp_file.name, format="audio/mp3")
-                st.balloons()  # Fun animation!
-                st.success(f"🎵✨ Audio is ready in {language}!")
+                
+                # Use the new speak_text function
+                if speak_text(response_text, lang_code):
+                    st.balloons()  # Fun animation!
+                    st.success(f"🎵✨ Audio is ready in {language}!")
+                else:
+                    st.error(f"Audio magic failed for {language}")
+                    
             except Exception as e:
                 st.error(f"Audio magic failed: {str(e)}")
                 # Debug info
