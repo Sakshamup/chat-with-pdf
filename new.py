@@ -1066,7 +1066,6 @@ if st.session_state.chat_history:
     col1, col2, col3 = st.columns(3)
     
     with col1:
-        st.markdown('<div class="feature-box">', unsafe_allow_html=True)
         if st.button("🔊 Listen", use_container_width=True):
             try:
                 # Get the language code for the selected language
@@ -1081,10 +1080,8 @@ if st.session_state.chat_history:
                     
             except Exception as e:
                 st.error(f"Audio failed: {str(e)}")
-        st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
-        st.markdown('<div class="feature-box">', unsafe_allow_html=True)
         if st.button("💾 Export", use_container_width=True):
             chat_text = "\n".join([f"Q: {chat[0]}\nA: {chat[1]}\n{'-'*50}\n" for chat in st.session_state.chat_history])
             st.download_button(
@@ -1094,10 +1091,8 @@ if st.session_state.chat_history:
                 mime="text/plain",
                 use_container_width=True
             )
-        st.markdown('</div>', unsafe_allow_html=True)
     
     with col3:
-        st.markdown('<div class="feature-box">', unsafe_allow_html=True)
         if st.button("🗑️ Clear", use_container_width=True):
             st.session_state.chat_history = []
             if "vector_store_ready" in st.session_state:
@@ -1105,7 +1100,6 @@ if st.session_state.chat_history:
             if "chunk_count" in st.session_state:
                 del st.session_state.chunk_count
             st.rerun()
-        st.markdown('</div>', unsafe_allow_html=True)
 
 # Feedback section
 if st.session_state.chat_history:
