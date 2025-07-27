@@ -679,11 +679,8 @@ def process_user_message(user_input):
         return f"❌ Critical error: {str(e)}"
 
 def translate_text(text, target_language):
-    """Translate text to target language using Google Translate"""
+    """Translate text to target language using Google Translate with multiple fallback methods"""
     try:
-        # Initialize translator with a specific service URL to avoid issues
-        translator = Translator(service_urls=['translate.google.com'])
-        
         # Don't translate if target is English
         if target_language == "en":
             return text
@@ -693,65 +690,126 @@ def translate_text(text, target_language):
         if not text_to_translate:
             return text
         
-        # Split long text into smaller chunks if needed (Google Translate has limits)
-        max_length = 4500  # Safe limit for Google Translate
-        if len(text_to_translate) > max_length:
-            # Split text into sentences and translate in chunks
-            sentences = text_to_translate.split('. ')
-            translated_sentences = []
-            current_chunk = ""
+        # Method 1: Try with fresh Translator instance
+        try:
+            translator = Translator()
+            result = translator.translate(text_to_translate, dest=target_language)
             
-            for sentence in sentences:
-                if len(current_chunk + sentence) < max_length:
-                    current_chunk += sentence + ". "
-                else:
-                    if current_chunk:
-                        try:
-                            chunk_result = translator.translate(current_chunk.strip(), dest=target_language)
-                            if hasattr(chunk_result, 'text') and chunk_result.text:
-                                translated_sentences.append(chunk_result.text)
-                            else:
-                                translated_sentences.append(current_chunk)
-                        except:
-                            translated_sentences.append(current_chunk)
-                    current_chunk = sentence + ". "
-            
-            # Translate the last chunk
-            if current_chunk:
-                try:
-                    chunk_result = translator.translate(current_chunk.strip(), dest=target_language)
-                    if hasattr(chunk_result, 'text') and chunk_result.text:
-                        translated_sentences.append(chunk_result.text)
-                    else:
-                        translated_sentences.append(current_chunk)
-                except:
-                    translated_sentences.append(current_chunk)
-            
-            return " ".join(translated_sentences)
-        else:
-            # Translate short text directly
-            try:
-                result = translator.translate(text_to_translate, dest=target_language)
-                
-                # Check if result has the expected attributes
+            # Multiple ways to extract the translated text
+            if result:
+                # Try direct access
                 if hasattr(result, 'text') and result.text:
                     return result.text.strip()
-                else:
-                    # Fallback: try to access result differently
-                    if hasattr(result, '__dict__'):
-                        if 'text' in result.__dict__ and result.__dict__['text']:
-                            return result.__dict__['text'].strip()
+                
+                # Try as string conversion
+                translated_str = str(result)
+                if translated_str and translated_str != str(result.__class__):
+                    return translated_str.strip()
+                
+                # Try accessing via dictionary
+                if hasattr(result, '__dict__'):
+                    result_dict = result.__dict__
+                    if 'text' in result_dict and result_dict['text']:
+                        return result_dict['text'].strip()
                     
-                    # If all else fails, return original text
-                    st.warning(f"⚠️ Translation completed but result format unexpected. Using original text.")
-                    return text
-                    
-            except Exception as translate_error:
-                st.warning(f"⚠️ Translation failed: {str(translate_error)}. Using original text.")
-                return text
+                    # Look for other possible text fields
+                    for key in ['translated_text', 'translation', 'result']:
+                        if key in result_dict and result_dict[key]:
+                            return str(result_dict[key]).strip()
             
+        except Exception as e1:
+            st.write(f"🔄 Method 1 failed: {str(e1)[:100]}... Trying alternative method...")
+        
+        # Method 2: Try with different service URLs
+        try:
+            for service_url in ['translate.googleapis.com', 'translate.google.co.in', 'translate.google.com']:
+                try:
+                    translator = Translator(service_urls=[service_url])
+                    result = translator.translate(text_to_translate, dest=target_language)
+                    
+                    if result and hasattr(result, 'text') and result.text:
+                        return result.text.strip()
+                        
+                except Exception:
+                    continue
+                    
+        except Exception as e2:
+            st.write(f"🔄 Method 2 failed: {str(e2)[:100]}... Trying method 3...")
+        
+        # Method 3: Try chunking the text
+        try:
+            translator = Translator()
+            
+            # Split into smaller chunks
+            max_chunk_size = 500
+            words = text_to_translate.split()
+            chunks = []
+            current_chunk = []
+            current_length = 0
+            
+            for word in words:
+                if current_length + len(word) + 1 <= max_chunk_size:
+                    current_chunk.append(word)
+                    current_length += len(word) + 1
+                else:
+                    if current_chunk:
+                        chunks.append(' '.join(current_chunk))
+                    current_chunk = [word]
+                    current_length = len(word)
+            
+            if current_chunk:
+                chunks.append(' '.join(current_chunk))
+            
+            # Translate each chunk
+            translated_chunks = []
+            for chunk in chunks:
+                try:
+                    result = translator.translate(chunk, dest=target_language)
+                    if result and hasattr(result, 'text') and result.text:
+                        translated_chunks.append(result.text)
+                    else:
+                        translated_chunks.append(chunk)  # Keep original if translation fails
+                except:
+                    translated_chunks.append(chunk)  # Keep original if translation fails
+            
+            if translated_chunks:
+                return ' '.join(translated_chunks).strip()
+                
+        except Exception as e3:
+            st.write(f"🔄 Method 3 failed: {str(e3)[:100]}... Using Google Generative AI...")
+        
+        # Method 4: Use Google Generative AI for translation as fallback
+        try:
+            # Create a simple translation prompt
+            translation_prompt = f"""
+            Please translate the following text from English to {target_language}. 
+            Provide only the translation, no explanations or additional text.
+            
+            Text to translate: {text_to_translate}
+            """
+            
+            model = ChatGoogleGenerativeAI(
+                model="gemini-2.0-flash-exp", 
+                temperature=0.1,  # Low temperature for consistent translation
+                google_api_key=os.getenv("GOOGLE_API_KEY")
+            )
+            
+            ai_translation = model.invoke(translation_prompt)
+            if hasattr(ai_translation, 'content') and ai_translation.content:
+                translated_text = ai_translation.content.strip()
+                # Remove any quotes or extra formatting
+                translated_text = translated_text.strip('"\'')
+                return translated_text
+                
+        except Exception as e4:
+            st.write(f"🔄 AI translation failed: {str(e4)[:100]}...")
+        
+        # If all methods fail, return original text
+        st.warning(f"⚠️ All translation methods failed. Using original English text.")
+        return text
+        
     except Exception as e:
-        st.error(f"❌ Translation error: {str(e)}")
+        st.error(f"❌ Critical translation error: {str(e)}")
         return text
 
 def speak_text(text, language_code):
