@@ -11,7 +11,6 @@ import google.generativeai as genai
 from gtts import gTTS
 import tempfile
 import re
-from googletrans import Translator
 
 # Load environment variables
 load_dotenv()
@@ -32,22 +31,6 @@ except Exception as e:
 headers = {
     "authorization": os.getenv("GOOGLE_API_KEY"),
     "content-type": "application/json"
-}
-
-# Language mapping for gTTS and translation
-LANGUAGE_MAPPING = {
-    "English": {"code": "en", "translate": "en"},
-    "Hindi": {"code": "hi", "translate": "hi"},
-    "Spanish": {"code": "es", "translate": "es"},
-    "French": {"code": "fr", "translate": "fr"},
-    "German": {"code": "de", "translate": "de"},
-    "Arabic": {"code": "ar", "translate": "ar"},
-    "Chinese": {"code": "zh", "translate": "zh"},
-    "Japanese": {"code": "ja", "translate": "ja"},
-    "Korean": {"code": "ko", "translate": "ko"},
-    "Portuguese": {"code": "pt", "translate": "pt"},
-    "Russian": {"code": "ru", "translate": "ru"},
-    "Italian": {"code": "it", "translate": "it"},
 }
 
 # Page config with custom styling
@@ -221,13 +204,6 @@ st.markdown("""
         padding: 0.75rem 1rem;
     }
     
-    /* Selectbox styling */
-    .stSelectbox > div > div > select {
-        border-radius: 15px;
-        border: 2px solid #4ecdc4;
-        background: rgba(255, 255, 255, 0.9);
-    }
-    
     /* Success/warning message styling */
     .success {
         background: linear-gradient(135deg, #4ecdc4, #44a08d);
@@ -329,14 +305,6 @@ st.markdown("""
         text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
     }
     
-    /* Sidebar selectbox styling */
-    section[data-testid="stSidebar"] .stSelectbox > div > div {
-        background: rgba(255, 255, 255, 0.9);
-        border-radius: 15px;
-        border: 2px solid rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(10px);
-    }
-    
     /* Sidebar metrics styling */
     section[data-testid="stSidebar"] .css-1r6slb0 {
         background: rgba(255, 255, 255, 0.2);
@@ -371,35 +339,6 @@ st.markdown('<p class="sub-header">✨ Intelligent Document Analysis with Enhanc
 
 # Sidebar with bright styling
 with st.sidebar:
-    st.markdown("### 🎨 Settings")
-    
-    # Language selection with icon
-    language = st.selectbox(
-        "🌍 Select Language", 
-        list(LANGUAGE_MAPPING.keys()),
-        help="Choose your preferred language for responses and text-to-speech"
-    )
-    
-    # Translation toggle
-    translate_responses = st.checkbox(
-        "🔄 Translate Responses",
-        value=False,
-        help="Translate AI responses to your selected language"
-    )
-    
-    # Show translation status
-    if translate_responses:
-        if language == "English":
-            st.info("ℹ️ Translation disabled for English")
-        else:
-            st.success(f"🌐 Will translate to {language}")
-    else:
-        st.info("🔤 Responses will be in English")
-    
-
-    
-    # Status indicator with bright colors
-    st.markdown("---")
     st.markdown("### 🎯 Status")
     if "vector_store_ready" in st.session_state and st.session_state.vector_store_ready:
         st.markdown("🟢 **PDF Processed Successfully!**")
@@ -413,7 +352,7 @@ with st.sidebar:
     # Fun fact section
     st.markdown("---")
     st.markdown("### 🎉 Fun Fact")
-    st.info("💡 Enhanced AI can find answers and translate them into 12+ languages!")
+    st.info("💡 Enhanced AI can find answers from your documents with improved intelligence!")
 
 # File upload section with bright styling
 st.markdown('<div class="upload-section">', unsafe_allow_html=True)
@@ -428,14 +367,12 @@ uploaded_files = st.file_uploader(
 st.markdown('</div>', unsafe_allow_html=True)
 
 def extract_text_from_pdfs(files):
-    """Extract text from uploaded PDF files - NO CACHE"""
+    """Extract text from uploaded PDF files"""
     text = ""
     total_pages = 0
     
     try:
         for file_idx, file in enumerate(files):
-            st.write(f"📄 Processing: {file.name}")
-            
             # Reset file pointer to beginning
             file.seek(0)
             
@@ -444,28 +381,18 @@ def extract_text_from_pdfs(files):
                 file_pages = len(pdf_reader.pages)
                 total_pages += file_pages
                 
-                st.write(f"📊 Found {file_pages} pages in {file.name}")
-                
                 for page_num, page in enumerate(pdf_reader.pages):
                     try:
                         page_text = page.extract_text()
                         if page_text.strip():  # Only add non-empty pages
                             text += f"\n\n--- FILE: {file.name} | PAGE {page_num + 1} ---\n{page_text}"
-                        
-                        # Show progress for large files
-                        if file_pages > 10 and (page_num + 1) % 5 == 0:
-                            st.write(f"⏳ Processed {page_num + 1}/{file_pages} pages...")
                             
                     except Exception as page_error:
-                        st.warning(f"⚠️ Error reading page {page_num + 1} from {file.name}: {str(page_error)}")
                         continue
                         
             except Exception as file_error:
-                st.error(f"❌ Error processing {file.name}: {str(file_error)}")
                 continue
                 
-        st.success(f"✅ Successfully extracted text from {total_pages} total pages!")
-        
         if not text.strip():
             st.error("❌ No text could be extracted from the uploaded PDFs. Please check if they contain readable text.")
             return None
@@ -485,7 +412,7 @@ def preprocess_text(text):
     return text
 
 def create_vector_store(text):
-    """Create FAISS vector store from text - REMOVED CACHE DECORATOR"""
+    """Create FAISS vector store from text"""
     if not text or not text.strip():
         st.error("❌ No text provided for vector store creation!")
         return 0
@@ -500,7 +427,6 @@ def create_vector_store(text):
                 separators=["\n\n", "\n", ". ", " ", ""]  # Better separation logic
             )
             
-            st.write("📝 Splitting text into chunks...")
             text_chunks = text_splitter.split_text(text)
             
             # Filter out very short chunks that might not be useful
@@ -509,21 +435,15 @@ def create_vector_store(text):
             if not text_chunks:
                 st.error("❌ No valid text chunks created! Please check your PDF content.")
                 return 0
-                
-            st.write(f"✅ Created {len(text_chunks)} text chunks")
             
             # Initialize embeddings with error handling
             try:
-                st.write("🧠 Initializing Google AI embeddings...")
                 embeddings = GoogleGenerativeAIEmbeddings(
                     model="models/embedding-001",
                     google_api_key=os.getenv("GOOGLE_API_KEY")
                 )
                 
-                st.write("🔗 Creating vector database...")
                 vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
-                
-                st.write("💾 Saving vector store...")
                 vector_store.save_local("faiss_index")
                 
                 # Return the actual chunk count
@@ -678,35 +598,7 @@ def process_user_message(user_input):
     except Exception as e:
         return f"❌ Critical error: {str(e)}"
 
-def translate_text(text, target_language):
-    """Translate text to target language using Google Translate"""
-    try:
-        # Initialize translator
-        translator = Translator()
-        
-        # Don't translate if target is English
-        if target_language == "en":
-            return text
-        
-        # Clean the text first
-        text_to_translate = text.strip()
-        if not text_to_translate:
-            return text
-            
-        # Perform translation silently
-        translated = translator.translate(text_to_translate, dest=target_language)
-        
-        if translated and translated.text:
-            translated_text = translated.text.strip()
-            return translated_text
-        else:
-            return text
-            
-    except Exception as e:
-        st.error(f"❌ Translation error: {str(e)}")
-        return text
-
-def speak_text(text, language_code):
+def speak_text(text, language_code="en"):
     """Convert text to speech and play it"""
     try:
         tts = gTTS(text=text, lang=language_code)
@@ -722,10 +614,8 @@ def speak_text(text, language_code):
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# PDF Processing with better error handling
+# PDF Processing with minimal display
 if uploaded_files:
-    st.markdown("### 🔄 Processing Your PDFs...")
-    
     # Extract text from PDFs
     raw_text = extract_text_from_pdfs(uploaded_files)
     
@@ -741,7 +631,7 @@ if uploaded_files:
                 # Store the chunk count and set ready flag
                 st.session_state.chunk_count = chunk_count
                 st.session_state.vector_store_ready = True
-                st.success(f"🎉✨ PDFs processed successfully! Created {chunk_count} searchable chunks! ✨🎉")
+                st.success(f"🎉✨ PDFs processed successfully! ✨🎉")
                 st.balloons()
             else:
                 st.error("❌ Failed to create vector store. Please try again or check your API configuration.")
@@ -771,34 +661,11 @@ if ask_button and user_input:
     if "vector_store_ready" not in st.session_state:
         st.warning("⚠️ Please upload and process a PDF first!")
     else:
-        # Get the original response
+        # Get the response
         response = process_user_message(user_input)
         
-        # Check if translation is enabled and language is not English
-        if translate_responses and language != "English":
-            target_lang = LANGUAGE_MAPPING[language]["translate"]
-            lang_code = LANGUAGE_MAPPING[language]["code"]
-            
-            with st.spinner(f"🔄 Translating and preparing audio in {language}..."):
-                try:
-                    # Translate the response silently
-                    translated_response = translate_text(response, target_lang)
-                    
-                    # Store the translated response
-                    st.session_state.chat_history.append((user_input, translated_response))
-                    
-                    # Automatically speak the translated response
-                    if speak_text(translated_response, lang_code):
-                        st.success(f"🎵✨ Response translated to {language} and spoken automatically!")
-                    else:
-                        st.warning(f"✅ Response translated to {language} but audio playback failed.")
-                        
-                except Exception as trans_error:
-                    st.warning(f"⚠️ Translation failed: {str(trans_error)}. Showing original response.")
-                    st.session_state.chat_history.append((user_input, response))
-        else:
-            # Store original response
-            st.session_state.chat_history.append((user_input, response))
+        # Store the response
+        st.session_state.chat_history.append((user_input, response))
 
 # Display chat history with bright styling
 if st.session_state.chat_history:
@@ -813,14 +680,9 @@ if st.session_state.chat_history:
         ''', unsafe_allow_html=True)
         
         # Bot message with bright styling
-        # Show translation status if applicable
-        translation_note = ""
-        if translate_responses and language != "English":
-            translation_note = f" (Translated to {language})"
-            
         st.markdown(f'''
         <div class="bot-message">
-            <strong>🤖✨ AI Magic Response{translation_note}:</strong> {answer}
+            <strong>🤖✨ AI Magic Response:</strong> {answer}
         </div>
         ''', unsafe_allow_html=True)
         
@@ -837,25 +699,17 @@ if st.session_state.chat_history:
         st.markdown('<div class="feature-box">', unsafe_allow_html=True)
         if st.button("🔊🎵 Listen Magic", use_container_width=True):
             try:
-                # Get the language code correctly from the dictionary
-                if isinstance(LANGUAGE_MAPPING[language], dict):
-                    lang_code = LANGUAGE_MAPPING[language]["code"]
-                else:
-                    lang_code = LANGUAGE_MAPPING[language]
-                    
                 response_text = st.session_state.chat_history[-1][1]
                 
-                # Use the new speak_text function
-                if speak_text(response_text, lang_code):
+                # Use the speak_text function with English
+                if speak_text(response_text, "en"):
                     st.balloons()  # Fun animation!
-                    st.success(f"🎵✨ Audio is ready in {language}!")
+                    st.success(f"🎵✨ Audio is ready!")
                 else:
-                    st.error(f"Audio magic failed for {language}")
+                    st.error("Audio magic failed")
                     
             except Exception as e:
                 st.error(f"Audio magic failed: {str(e)}")
-                # Debug info
-                st.error(f"Debug: Language = {language}, Mapping = {LANGUAGE_MAPPING.get(language, 'Not found')}")
         st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
@@ -903,14 +757,6 @@ if st.session_state.chat_history:
             if "Amazing" in feedback:
                 st.balloons()
 
-# Debug information (optional)
-if st.session_state.get('vector_store_ready') and st.checkbox("🔍 Show Debug Info"):
-    st.markdown("### 🛠️ Debug Information")
-    if 'chunk_count' in st.session_state:
-        st.info(f"📊 Total text chunks created: {st.session_state.chunk_count}")
-    st.info(f"📄 Searching 6 documents per query")
-    st.info(f"🎯 Using default similarity matching")
-
 # Bright footer
 st.markdown("---")
 st.markdown(
@@ -918,7 +764,7 @@ st.markdown(
     <div style='text-align: center; color: #ffffff; padding: 2rem; background: linear-gradient(45deg, #ff6b6b, #4ecdc4, #45b7d1, #feca57, #ff9ff3); border-radius: 15px; margin-top: 2rem; box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);'>
         <h3>🌈 Enhanced PDF Chatbot with Improved Answer Retrieval ✨</h3>
         <p style='font-size: 1.1rem; margin-top: 1rem;'>
-            🚀 <strong>Upload PDF → Ask Magical Questions → Get Brilliant Answers (Even Better Now!)</strong> 🌟
+            🚀 <strong>Upload PDF → Ask Magical Questions → Get Brilliant Answers!</strong> 🌟
         </p>
         <p style='font-size: 0.9rem; opacity: 0.8;'>
             Experience the future of document analysis with enhanced intelligence! 🔮✨
