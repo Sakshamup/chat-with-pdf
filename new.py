@@ -13,6 +13,22 @@ import tempfile
 import re
 from googletrans import Translator
 
+# Load environment variables
+load_dotenv()
+
+# Configure Google API
+try:
+    api_key = os.getenv("GOOGLE_API_KEY")
+    if not api_key:
+        st.error("🚨 GOOGLE_API_KEY not found! Please set your API key in environment variables.")
+        st.stop()
+    
+    genai.configure(api_key=api_key)
+    st.success("✅ Google API configured successfully!")
+except Exception as e:
+    st.error(f"🚨 API Configuration Error: {str(e)}")
+    st.stop()
+
 headers = {
     "authorization": os.getenv("GOOGLE_API_KEY"),
     "content-type": "application/json"
@@ -404,14 +420,53 @@ st.markdown('</div>', unsafe_allow_html=True)
 
 @st.cache_data
 def extract_text_from_pdfs(files):
+    """Extract text from uploaded PDF files"""
     text = ""
-    for file in files:
-        pdf_reader = PdfReader(file)
-        for page_num, page in enumerate(pdf_reader.pages):
-            page_text = page.extract_text()
-            # Add page markers for better context
-            text += f"\n\n--- PAGE {page_num + 1} ---\n{page_text}"
-    return text
+    total_pages = 0
+    
+    try:
+        for file_idx, file in enumerate(files):
+            st.write(f"📄 Processing: {file.name}")
+            
+            # Reset file pointer to beginning
+            file.seek(0)
+            
+            try:
+                pdf_reader = PdfReader(file)
+                file_pages = len(pdf_reader.pages)
+                total_pages += file_pages
+                
+                st.write(f"📊 Found {file_pages} pages in {file.name}")
+                
+                for page_num, page in enumerate(pdf_reader.pages):
+                    try:
+                        page_text = page.extract_text()
+                        if page_text.strip():  # Only add non-empty pages
+                            text += f"\n\n--- FILE: {file.name} | PAGE {page_num + 1} ---\n{page_text}"
+                        
+                        # Show progress for large files
+                        if file_pages > 10 and (page_num + 1) % 5 == 0:
+                            st.write(f"⏳ Processed {page_num + 1}/{file_pages} pages...")
+                            
+                    except Exception as page_error:
+                        st.warning(f"⚠️ Error reading page {page_num + 1} from {file.name}: {str(page_error)}")
+                        continue
+                        
+            except Exception as file_error:
+                st.error(f"❌ Error processing {file.name}: {str(file_error)}")
+                continue
+                
+        st.success(f"✅ Successfully extracted text from {total_pages} total pages!")
+        
+        if not text.strip():
+            st.error("❌ No text could be extracted from the uploaded PDFs. Please check if they contain readable text.")
+            return None
+            
+        return text
+        
+    except Exception as e:
+        st.error(f"❌ Critical error during PDF processing: {str(e)}")
+        return None
 
 def preprocess_text(text):
     # Improved text preprocessing
@@ -423,52 +478,100 @@ def preprocess_text(text):
 
 @st.cache_data
 def create_vector_store(text):
-    with st.spinner("🔄 Processing your PDF with enhanced chunking... This may take a moment"):
-        # Improved text splitting with better parameters
-        text_splitter = RecursiveCharacterTextSplitter(
-            chunk_size=1500,  # Smaller chunks for better precision
-            chunk_overlap=300,  # More overlap for better context preservation
-            length_function=len,
-            separators=["\n\n", "\n", ". ", " ", ""]  # Better separation logic
-        )
-        text_chunks = text_splitter.split_text(text)
+    """Create FAISS vector store from text"""
+    if not text or not text.strip():
+        st.error("❌ No text provided for vector store creation!")
+        return False
         
-        # Filter out very short chunks that might not be useful
-        text_chunks = [chunk for chunk in text_chunks if len(chunk.strip()) > 50]
-        
-        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-        vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
-        vector_store.save_local("faiss_index")
-        
-        # Store chunk count for debugging
-        st.session_state.chunk_count = len(text_chunks)
-    st.session_state.vector_store_ready = True
+    try:
+        with st.spinner("🔄 Creating AI embeddings... This may take a moment"):
+            # Improved text splitting with better parameters
+            text_splitter = RecursiveCharacterTextSplitter(
+                chunk_size=1500,  # Smaller chunks for better precision
+                chunk_overlap=300,  # More overlap for better context preservation
+                length_function=len,
+                separators=["\n\n", "\n", ". ", " ", ""]  # Better separation logic
+            )
+            
+            st.write("📝 Splitting text into chunks...")
+            text_chunks = text_splitter.split_text(text)
+            
+            # Filter out very short chunks that might not be useful
+            text_chunks = [chunk for chunk in text_chunks if len(chunk.strip()) > 50]
+            
+            if not text_chunks:
+                st.error("❌ No valid text chunks created! Please check your PDF content.")
+                return False
+                
+            st.write(f"✅ Created {len(text_chunks)} text chunks")
+            
+            # Initialize embeddings with error handling
+            try:
+                st.write("🧠 Initializing Google AI embeddings...")
+                embeddings = GoogleGenerativeAIEmbeddings(
+                    model="models/embedding-001",
+                    google_api_key=os.getenv("GOOGLE_API_KEY")
+                )
+                
+                st.write("🔗 Creating vector database...")
+                vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
+                
+                st.write("💾 Saving vector store...")
+                vector_store.save_local("faiss_index")
+                
+                # Store chunk count for debugging
+                st.session_state.chunk_count = len(text_chunks)
+                st.session_state.vector_store_ready = True
+                
+                return True
+                
+            except Exception as embedding_error:
+                st.error(f"❌ Error creating embeddings: {str(embedding_error)}")
+                st.error("🔍 This might be due to API key issues or network problems.")
+                return False
+                
+    except Exception as e:
+        st.error(f"❌ Error in vector store creation: {str(e)}")
+        return False
 
 def get_conversational_chain():
-    # Enhanced prompt template with better instructions
-    prompt_template = """
-    You are an intelligent AI assistant analyzing a document. Use the provided context to answer the question as comprehensively as possible.
+    """Create conversational chain with error handling"""
+    try:
+        # Enhanced prompt template with better instructions
+        prompt_template = """
+        You are an intelligent AI assistant analyzing a document. Use the provided context to answer the question as comprehensively as possible.
 
-    INSTRUCTIONS:
-    1. If you find relevant information in the context, provide a detailed and helpful answer
-    2. If the exact answer isn't available, try to provide related information that might be helpful
-    3. If you can make reasonable inferences from the available information, do so while indicating they are inferences
-    4. Only say "Answer is not available in the context" if there is absolutely no relevant information
-    5. Be conversational and helpful in your tone
-    6. If appropriate, suggest what additional information might be needed
+        INSTRUCTIONS:
+        1. If you find relevant information in the context, provide a detailed and helpful answer
+        2. If the exact answer isn't available, try to provide related information that might be helpful
+        3. If you can make reasonable inferences from the available information, do so while indicating they are inferences
+        4. Only say "Answer is not available in the context" if there is absolutely no relevant information
+        5. Be conversational and helpful in your tone
+        6. If appropriate, suggest what additional information might be needed
 
-    Context:
-    {context}
+        Context:
+        {context}
 
-    Question: {question}
+        Question: {question}
 
-    Helpful Answer:
-    """
-    
-    # Increased temperature for more creative responses when context is limited
-    model = ChatGoogleGenerativeAI(model="gemini-2.0-flash-exp", temperature=0.4)
-    prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
-    return load_qa_chain(model, chain_type="stuff", prompt=prompt)
+        Helpful Answer:
+        """
+        
+        # Initialize model with error handling
+        model = ChatGoogleGenerativeAI(
+            model="gemini-2.0-flash-exp", 
+            temperature=0.4,
+            google_api_key=os.getenv("GOOGLE_API_KEY")
+        )
+        
+        prompt = PromptTemplate(template=prompt_template, input_variables=["context", "question"])
+        chain = load_qa_chain(model, chain_type="stuff", prompt=prompt)
+        
+        return chain
+        
+    except Exception as e:
+        st.error(f"❌ Error creating conversational chain: {str(e)}")
+        return None
 
 def enhance_query(query):
     """Enhance user query with synonyms and related terms"""
@@ -495,6 +598,82 @@ def enhance_query(query):
     
     return " ".join(enhanced_terms)
 
+def process_user_message(user_input):
+    """Process user message with enhanced error handling"""
+    try:
+        with st.spinner("🤔 Thinking with enhanced intelligence..."):
+            # Check if vector store exists
+            if not os.path.exists("faiss_index"):
+                return "❌ Vector store not found. Please upload and process a PDF first."
+            
+            # Initialize embeddings
+            embeddings = GoogleGenerativeAIEmbeddings(
+                model="models/embedding-001",
+                google_api_key=os.getenv("GOOGLE_API_KEY")
+            )
+            
+            # Load vector store
+            try:
+                vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
+            except Exception as load_error:
+                return f"❌ Error loading vector store: {str(load_error)}. Please reprocess your PDF."
+            
+            # Enhanced query
+            enhanced_query = enhance_query(user_input)
+            
+            # Get more documents for better context (fixed at 6)
+            num_docs = 6
+            docs = vector_store.similarity_search(enhanced_query, k=num_docs)
+        
+            # Also try with the original query if enhanced query doesn't yield good results
+            if len(docs) < num_docs:
+                additional_docs = vector_store.similarity_search(user_input, k=num_docs)
+                # Combine and deduplicate
+                all_docs = docs + additional_docs
+                seen_content = set()
+                unique_docs = []
+                for doc in all_docs:
+                    if doc.page_content not in seen_content:
+                        unique_docs.append(doc)
+                        seen_content.add(doc.page_content)
+                docs = unique_docs[:num_docs]
+            
+            # If still no good matches, try with more relaxed search
+            if len(docs) < 3:
+                # Try searching with individual words from the query
+                words = user_input.split()
+                for word in words:
+                    if len(word) > 3:  # Only search meaningful words
+                        word_docs = vector_store.similarity_search(word, k=2)
+                        docs.extend(word_docs)
+            
+            # Get conversational chain
+            chain = get_conversational_chain()
+            if not chain:
+                return "❌ Error initializing AI model. Please check your API configuration."
+            
+            try:
+                response = chain({"input_documents": docs, "question": user_input}, return_only_outputs=True)
+                answer = response["output_text"]
+                
+                # If we still get a "not available" response, try a fallback approach
+                if "not available in the context" in answer.lower() or "cannot find" in answer.lower():
+                    # Try a more general search
+                    general_docs = vector_store.similarity_search(user_input, k=10)
+                    if general_docs:
+                        fallback_response = chain({"input_documents": general_docs, "question": f"Based on the available information, what can you tell me about: {user_input}"}, return_only_outputs=True)
+                        fallback_answer = fallback_response["output_text"]
+                        if "not available" not in fallback_answer.lower():
+                            answer = fallback_answer
+                
+                return answer
+                
+            except Exception as chain_error:
+                return f"❌ Error processing question: {str(chain_error)}"
+                
+    except Exception as e:
+        return f"❌ Critical error: {str(e)}"
+
 def translate_text(text, target_language):
     """Translate text to target language using Google Translate"""
     try:
@@ -513,71 +692,34 @@ def translate_text(text, target_language):
         st.error(f"Translation failed: {str(e)}")
         return text
 
-def process_user_message(user_input):
-    with st.spinner("🤔 Thinking with enhanced intelligence..."):
-        embeddings = GoogleGenerativeAIEmbeddings(model="models/embedding-001")
-        vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-        
-        # Enhanced query
-        enhanced_query = enhance_query(user_input)
-        
-        # Get more documents for better context (fixed at 6)
-        num_docs = 6
-        docs = vector_store.similarity_search(enhanced_query, k=num_docs)
-        
-        # Also try with the original query if enhanced query doesn't yield good results
-        if len(docs) < num_docs:
-            additional_docs = vector_store.similarity_search(user_input, k=num_docs)
-            # Combine and deduplicate
-            all_docs = docs + additional_docs
-            seen_content = set()
-            unique_docs = []
-            for doc in all_docs:
-                if doc.page_content not in seen_content:
-                    unique_docs.append(doc)
-                    seen_content.add(doc.page_content)
-            docs = unique_docs[:num_docs]
-        
-        # If still no good matches, try with more relaxed search
-        if len(docs) < 3:
-            # Try searching with individual words from the query
-            words = user_input.split()
-            for word in words:
-                if len(word) > 3:  # Only search meaningful words
-                    word_docs = vector_store.similarity_search(word, k=2)
-                    docs.extend(word_docs)
-        
-        chain = get_conversational_chain()
-        
-        try:
-            response = chain({"input_documents": docs, "question": user_input}, return_only_outputs=True)
-            answer = response["output_text"]
-            
-            # If we still get a "not available" response, try a fallback approach
-            if "not available in the context" in answer.lower() or "cannot find" in answer.lower():
-                # Try a more general search
-                general_docs = vector_store.similarity_search(user_input, k=10)
-                if general_docs:
-                    fallback_response = chain({"input_documents": general_docs, "question": f"Based on the available information, what can you tell me about: {user_input}"}, return_only_outputs=True)
-                    fallback_answer = fallback_response["output_text"]
-                    if "not available" not in fallback_answer.lower():
-                        answer = fallback_answer
-            
-            return answer
-            
-        except Exception as e:
-            return f"Sorry, I encountered an error while processing your question: {str(e)}"
-
 # Initialize chat history
 if "chat_history" not in st.session_state:
     st.session_state.chat_history = []
 
-# PDF Processing
+# PDF Processing with better error handling
 if uploaded_files:
+    st.markdown("### 🔄 Processing Your PDFs...")
+    
+    # Extract text from PDFs
     raw_text = extract_text_from_pdfs(uploaded_files)
-    raw_text = preprocess_text(raw_text)
-    create_vector_store(raw_text)
-    st.success(f"🎉✨ PDFs processed successfully! Created {st.session_state.get('chunk_count', 0)} searchable chunks! ✨🎉")
+    
+    if raw_text:
+        # Preprocess text
+        processed_text = preprocess_text(raw_text)
+        
+        if processed_text:
+            # Create vector store
+            success = create_vector_store(processed_text)
+            
+            if success:
+                st.success(f"🎉✨ PDFs processed successfully! Created {st.session_state.get('chunk_count', 0)} searchable chunks! ✨🎉")
+                st.balloons()
+            else:
+                st.error("❌ Failed to create vector store. Please try again or check your API configuration.")
+        else:
+            st.error("❌ Failed to preprocess text. Please check your PDF files.")
+    else:
+        st.error("❌ Failed to extract text from PDFs. Please ensure your PDFs contain readable text.")
 
 # Chat Interface with bright colors
 st.markdown("### 💬✨ Ask Brilliant Questions")
@@ -601,7 +743,15 @@ if ask_button and user_input:
         st.warning("⚠️ Please upload and process a PDF first!")
     else:
         response = process_user_message(user_input)
-        st.session_state.chat_history.append((user_input, response))
+        
+        # Translate response if enabled
+        if translate_responses and language != "English":
+            target_lang = LANGUAGE_MAPPING[language]["translate"]
+            with st.spinner(f"🔄 Translating to {language}..."):
+                translated_response = translate_text(response, target_lang)
+                st.session_state.chat_history.append((user_input, translated_response))
+        else:
+            st.session_state.chat_history.append((user_input, response))
 
 # Display chat history with bright styling
 if st.session_state.chat_history:
@@ -635,14 +785,23 @@ if st.session_state.chat_history:
         st.markdown('<div class="feature-box">', unsafe_allow_html=True)
         if st.button("🔊🎵 Listen Magic", use_container_width=True):
             try:
-                tts = gTTS(text=st.session_state.chat_history[-1][1], lang=LANGUAGE_MAPPING[language])
+                # Get the language code correctly from the dictionary
+                if isinstance(LANGUAGE_MAPPING[language], dict):
+                    lang_code = LANGUAGE_MAPPING[language]["code"]
+                else:
+                    lang_code = LANGUAGE_MAPPING[language]
+                    
+                response_text = st.session_state.chat_history[-1][1]
+                tts = gTTS(text=response_text, lang=lang_code)
                 temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
                 tts.save(temp_file.name)
                 st.audio(temp_file.name, format="audio/mp3")
                 st.balloons()  # Fun animation!
-                st.success("🎵✨ Audio is ready to enchant you!")
+                st.success(f"🎵✨ Audio is ready in {language}!")
             except Exception as e:
                 st.error(f"Audio magic failed: {str(e)}")
+                # Debug info
+                st.error(f"Debug: Language = {language}, Mapping = {LANGUAGE_MAPPING.get(language, 'Not found')}")
         st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
