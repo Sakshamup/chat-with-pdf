@@ -693,39 +693,30 @@ def translate_text(text, target_language):
         if not text_to_translate:
             return text
             
-        # Show what we're translating (for debugging)
-        st.write(f"🔄 Translating from detected language to {target_language}")
-        st.write(f"📝 Original text preview: {text_to_translate[:100]}...")
-        
-        # Detect source language
-        try:
-            detected = translator.detect(text_to_translate)
-            st.write(f"🔍 Detected language: {detected.lang} (confidence: {detected.confidence:.2f})")
-            
-            # Don't translate if already in target language
-            if detected.lang == target_language:
-                st.info(f"ℹ️ Text is already in {target_language}")
-                return text
-        except Exception as detect_error:
-            st.warning(f"⚠️ Language detection failed: {detect_error}. Proceeding with translation...")
-            
-        # Perform translation
-        st.write(f"🌐 Translating to {target_language}...")
+        # Perform translation silently
         translated = translator.translate(text_to_translate, dest=target_language)
         
         if translated and translated.text:
             translated_text = translated.text.strip()
-            st.write(f"✅ Translation successful!")
-            st.write(f"📝 Translated preview: {translated_text[:100]}...")
             return translated_text
         else:
-            st.error("❌ Translation returned empty result")
             return text
             
     except Exception as e:
         st.error(f"❌ Translation error: {str(e)}")
-        st.error("🔧 Please check your internet connection and try again.")
         return text
+
+def speak_text(text, language_code):
+    """Convert text to speech and play it"""
+    try:
+        tts = gTTS(text=text, lang=language_code)
+        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
+        tts.save(temp_file.name)
+        st.audio(temp_file.name, format="audio/mp3", autoplay=True)
+        return True
+    except Exception as e:
+        st.error(f"❌ Text-to-speech error: {str(e)}")
+        return False
 
 # Initialize chat history
 if "chat_history" not in st.session_state:
@@ -786,12 +777,22 @@ if ask_button and user_input:
         # Check if translation is enabled and language is not English
         if translate_responses and language != "English":
             target_lang = LANGUAGE_MAPPING[language]["translate"]
-            with st.spinner(f"🔄 Translating to {language}..."):
+            lang_code = LANGUAGE_MAPPING[language]["code"]
+            
+            with st.spinner(f"🔄 Translating and preparing audio in {language}..."):
                 try:
+                    # Translate the response silently
                     translated_response = translate_text(response, target_lang)
+                    
+                    # Store the translated response
                     st.session_state.chat_history.append((user_input, translated_response))
-                    # Show translation confirmation
-                    st.success(f"✅ Response translated to {language}")
+                    
+                    # Automatically speak the translated response
+                    if speak_text(translated_response, lang_code):
+                        st.success(f"🎵✨ Response translated to {language} and spoken automatically!")
+                    else:
+                        st.warning(f"✅ Response translated to {language} but audio playback failed.")
+                        
                 except Exception as trans_error:
                     st.warning(f"⚠️ Translation failed: {str(trans_error)}. Showing original response.")
                     st.session_state.chat_history.append((user_input, response))
