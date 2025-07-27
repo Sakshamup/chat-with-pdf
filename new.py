@@ -44,7 +44,12 @@ except Exception as e:
     st.error(f"🚨 API Configuration Error: {str(e)}")
     st.stop()
 
-# Page config
+headers = {
+    "authorization": os.getenv("GOOGLE_API_KEY"),
+    "content-type": "application/json"
+}
+
+# Page config with custom styling
 st.set_page_config(
     page_title="AI PDF Chatbot", 
     page_icon="📄",
@@ -52,283 +57,513 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Clean, Modern CSS
+# Professional Red-Orange CSS Theme
 st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    * {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
-    }
-    
+    /* Main app background - Professional red-orange gradient */
     .stApp {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 25%, #4a1810 50%, #6b2c17 75%, #8b3a1e 100%);
+        font-family: 'Inter', sans-serif;
     }
     
+    /* Main page container with sophisticated glass effect */
     .main .block-container {
-        background: white;
-        border-radius: 12px;
-        padding: 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 87, 34, 0.2);
+        padding: 2.5rem;
         margin: 1rem;
-        box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
-        max-width: 1200px;
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 
+                    0 0 0 1px rgba(255, 87, 34, 0.1);
+        position: relative;
     }
     
-    /* Header */
-    .main-title {
-        font-size: 2.5rem;
+    /* Add subtle animated background pattern */
+    .main .block-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 80%, rgba(244, 67, 54, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 87, 34, 0.1) 0%, transparent 50%);
+        border-radius: 20px;
+        pointer-events: none;
+        z-index: -1;
+    }
+    
+    .main-header {
+        font-size: 3rem;
         font-weight: 700;
-        color: #1f2937;
+        background: linear-gradient(135deg, #ff5722 0%, #f44336 50%, #d32f2f 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         text-align: center;
         margin-bottom: 0.5rem;
+        text-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+        letter-spacing: -0.02em;
     }
     
-    .subtitle {
-        font-size: 1.125rem;
-        color: #6b7280;
+    .sub-header {
         text-align: center;
+        color: #ffffff;
         margin-bottom: 2rem;
+        font-size: 1.2rem;
+        font-weight: 400;
+        background: rgba(255, 87, 34, 0.1);
+        padding: 1.2rem 2rem;
+        border-radius: 15px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.2);
+        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.1);
     }
     
-    /* Upload Section */
-    .upload-container {
-        background: #f9fafb;
-        border: 2px dashed #d1d5db;
-        border-radius: 8px;
+    .upload-section {
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
         padding: 2rem;
-        text-align: center;
-        margin-bottom: 2rem;
+        border-radius: 16px;
+        border: 2px dashed rgba(255, 87, 34, 0.4);
+        margin: 1.5rem 0;
+        box-shadow: 0 8px 30px rgba(255, 87, 34, 0.15);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
     }
     
-    .upload-container h3 {
-        color: #374151;
-        font-size: 1.25rem;
-        font-weight: 600;
-        margin-bottom: 0.5rem;
+    .upload-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 87, 34, 0.1), transparent);
+        transform: rotate(45deg);
+        animation: shimmer 3s infinite;
     }
     
-    .upload-container p {
-        color: #6b7280;
-        margin-bottom: 1rem;
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
     }
     
-    /* Chat Messages */
     .user-message {
-        background: #3b82f6;
+        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
         color: white;
-        padding: 1rem 1.5rem;
-        border-radius: 18px 18px 6px 18px;
+        padding: 1.2rem 1.5rem;
+        border-radius: 15px;
         margin: 1rem 0;
-        margin-left: 2rem;
+        border-left: 4px solid #d84315;
+        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.3);
         font-weight: 500;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .user-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s;
+    }
+    
+    .user-message:hover::before {
+        transform: translateX(100%);
     }
     
     .bot-message {
-        background: #f3f4f6;
-        color: #1f2937;
-        padding: 1rem 1.5rem;
-        border-radius: 18px 18px 18px 6px;
+        background: linear-gradient(135deg, #bf360c 0%, #d84315 100%);
+        color: white;
+        padding: 1.2rem 1.5rem;
+        border-radius: 15px;
         margin: 1rem 0;
-        margin-right: 2rem;
-        border-left: 4px solid #3b82f6;
+        border-left: 4px solid #8d2a0e;
+        box-shadow: 0 8px 25px rgba(191, 54, 12, 0.3);
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
     }
     
-    /* Buttons */
+    .bot-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s;
+    }
+    
+    .bot-message:hover::before {
+        transform: translateX(100%);
+    }
+    
+    /* Professional Sidebar */
+    .css-1d391kg, .css-18e3th9, section[data-testid="stSidebar"] {
+        background: linear-gradient(180deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 24, 16, 0.95) 50%, rgba(74, 24, 16, 0.95) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 87, 34, 0.2);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+    }
+    
+    .css-1d391kg > div {
+        background: transparent !important;
+    }
+    
+    .feature-box {
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
+        margin: 0.8rem 0;
+        text-align: center;
+        border: 1px solid rgba(255, 87, 34, 0.25);
+        backdrop-filter: blur(15px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .feature-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
+    }
+    
+    .feature-box:hover {
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 30px rgba(255, 87, 34, 0.25);
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.25) 0%, rgba(244, 67, 54, 0.2) 100%);
+        border-color: rgba(255, 87, 34, 0.4);
+    }
+    
+    .feature-box:hover::before {
+        left: 100%;
+    }
+    
+    /* Professional Button Styling */
     .stButton > button {
-        background: #3b82f6;
+        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
         color: white;
         border: none;
-        border-radius: 6px;
-        padding: 0.75rem 1.5rem;
-        font-weight: 500;
-        transition: all 0.2s;
+        border-radius: 12px;
+        padding: 0.8rem 2rem;
+        font-weight: 600;
+        font-size: 0.95rem;
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.5px;
+    }
+    
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
     }
     
     .stButton > button:hover {
-        background: #2563eb;
-        transform: translateY(-1px);
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(255, 87, 34, 0.4);
+        background: linear-gradient(135deg, #f4511e 0%, #d84315 100%);
     }
     
-    /* Input */
+    .stButton > button:hover::before {
+        left: 100%;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(0px);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+    }
+    
+    /* Enhanced Input Field Styling */
     .stTextInput > div > div > input {
-        border: 2px solid #d1d5db;
-        border-radius: 6px;
-        padding: 0.75rem;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 87, 34, 0.3);
+        padding: 0.8rem 1.2rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
         font-size: 1rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .stTextInput > div > div > input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #3b82f6;
+        border-color: #ff5722;
+        box-shadow: 0 0 20px rgba(255, 87, 34, 0.3);
+        background: rgba(255, 255, 255, 0.15);
         outline: none;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
     }
     
-    /* Sidebar */
-    section[data-testid="stSidebar"] {
-        background: rgba(255, 255, 255, 0.95);
-        backdrop-filter: blur(10px);
-    }
-    
-    section[data-testid="stSidebar"] h3 {
-        color: #1f2937;
+    /* Professional Section Headers */
+    h3 {
+        color: #ffffff;
         font-weight: 600;
-        padding: 0.5rem 0;
-        border-bottom: 2px solid #e5e7eb;
+        font-size: 1.3rem;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.25);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
         margin-bottom: 1rem;
     }
     
-    /* Feature boxes */
-    .feature-card {
-        background: white;
-        border: 1px solid #e5e7eb;
-        border-radius: 8px;
-        padding: 1.5rem;
-        text-align: center;
-        transition: all 0.2s;
-        margin-bottom: 1rem;
+    /* Radio button container */
+    .stRadio > div {
+        background: rgba(255, 87, 34, 0.1);
+        padding: 1.2rem;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.2);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
     }
     
-    .feature-card:hover {
-        border-color: #3b82f6;
-        box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
-        transform: translateY(-2px);
+    /* Metrics styling */
+    .css-1r6slb0 {
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
+        border-radius: 12px;
+        padding: 1.2rem;
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.2);
     }
     
-    /* File uploader */
+    /* Enhanced File uploader styling */
+    .css-1cpxqw2, 
+    section[data-testid="stFileUploader"],
+    .css-1cpxqw2 > div,
     div[data-testid="stFileUploader"] {
-        background: #f9fafb;
-        border: 2px dashed #d1d5db;
-        border-radius: 8px;
-        padding: 2rem;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%) !important;
+        border-radius: 16px !important;
+        border: 2px dashed rgba(255, 87, 34, 0.4) !important;
+        padding: 2rem !important;
+        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.15) !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
     }
     
     div[data-testid="stFileUploader"]:hover {
-        border-color: #3b82f6;
-        background: #eff6ff;
+        border-color: rgba(255, 87, 34, 0.6) !important;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%) !important;
+        transform: translateY(-2px) !important;
     }
     
-    /* Selectbox */
-    .stSelectbox > div > div {
-        border: 2px solid #d1d5db;
-        border-radius: 6px;
+    /* File uploader text styling */
+    div[data-testid="stFileUploader"] label,
+    div[data-testid="stFileUploader"] p,
+    div[data-testid="stFileUploader"] small {
+        color: #ffffff !important;
+        font-weight: 500 !important;
     }
     
-    .stSelectbox > div > div:focus-within {
-        border-color: #3b82f6;
-        box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+    /* Browse files button styling */
+    div[data-testid="stFileUploader"] button {
+        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%) !important;
+        color: white !important;
+        border: none !important;
+        border-radius: 10px !important;
+        padding: 0.8rem 1.8rem !important;
+        font-weight: 600 !important;
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.3) !important;
+        transition: all 0.3s ease !important;
     }
     
-    /* Success/Error messages */
+    div[data-testid="stFileUploader"] button:hover {
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.4) !important;
+        background: linear-gradient(135deg, #f4511e 0%, #d84315 100%) !important;
+    }
+    
+    /* File upload icon styling */
+    div[data-testid="stFileUploader"] svg {
+        color: #ffffff !important;
+        filter: drop-shadow(0 2px 4px rgba(255, 87, 34, 0.3)) !important;
+    }
+    
+    /* Sidebar content styling */
+    .css-18e3th9 {
+        background: transparent !important;
+        padding: 1.2rem;
+        border-radius: 15px;
+    }
+    
+    /* Sidebar text styling */
+    section[data-testid="stSidebar"] h3 {
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.15) 100%);
+        padding: 0.8rem 1.2rem;
+        border-radius: 10px;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 87, 34, 0.25);
+        color: #ffffff;
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
+    }
+    
+    /* Sidebar metrics styling */
+    section[data-testid="stSidebar"] .css-1r6slb0 {
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
+        border-radius: 10px;
+        padding: 1rem;
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.2);
+    }
+    
+    /* Sidebar info box styling */
+    section[data-testid="stSidebar"] .stAlert {
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.15) 100%);
+        color: #ffffff;
+        border-radius: 10px;
+        border: 1px solid rgba(255, 87, 34, 0.25);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
+    }
+    
+    /* Sidebar markdown text */
+    section[data-testid="stSidebar"] p, 
+    section[data-testid="stSidebar"] .stMarkdown {
+        color: #ffffff;
+        font-weight: 400;
+    }
+
+    /* Enhanced Success, Error, and Warning messages */
     .stSuccess {
-        background: #ecfdf5;
-        color: #065f46;
-        border: 1px solid #a7f3d0;
-        border-radius: 6px;
+        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
+        color: white;
+        border-radius: 12px;
+        border: 1px solid rgba(76, 175, 80, 0.3);
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.2);
     }
     
     .stError {
-        background: #fef2f2;
-        color: #991b1b;
-        border: 1px solid #fca5a5;
-        border-radius: 6px;
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
+        color: white;
+        border-radius: 12px;
+        border: 1px solid rgba(244, 67, 54, 0.3);
+        box-shadow: 0 6px 20px rgba(244, 67, 54, 0.2);
     }
     
     .stWarning {
-        background: #fffbeb;
-        color: #92400e;
-        border: 1px solid #fde68a;
-        border-radius: 6px;
-    }
-    
-    .stInfo {
-        background: #eff6ff;
-        color: #1e40af;
-        border: 1px solid #93c5fd;
-        border-radius: 6px;
-    }
-    
-    /* Metrics */
-    div[data-testid="metric-container"] {
-        background: #f9fafb;
-        border: 1px solid #e5e7eb;
-        border-radius: 6px;
-        padding: 1rem;
-    }
-    
-    /* Radio buttons */
-    .stRadio > div {
-        background: #f9fafb;
-        border-radius: 6px;
-        padding: 1rem;
-    }
-    
-    /* Clean typography */
-    h1, h2, h3, h4, h5, h6 {
-        color: #1f2937;
-        font-weight: 600;
-    }
-    
-    p, div, span {
-        color: #374151;
-        line-height: 1.6;
-    }
-    
-    /* Footer */
-    .footer {
-        background: #1f2937;
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
         color: white;
-        padding: 2rem;
-        border-radius: 8px;
-        text-align: center;
-        margin-top: 2rem;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 152, 0, 0.3);
+        box-shadow: 0 6px 20px rgba(255, 152, 0, 0.2);
     }
     
-    .footer h3 {
-        color: white;
-        margin-bottom: 1rem;
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
     }
     
-    .footer p {
-        color: #d1d5db;
+    ::-webkit-scrollbar-track {
+        background: rgba(255, 87, 34, 0.1);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #f4511e 0%, #d84315 100%);
+    }
+    
+    /* Loading spinner animation */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive design improvements */
+    @media (max-width: 768px) {
+        .main-header {
+            font-size: 2.2rem;
+        }
+        
+        .sub-header {
+            font-size: 1rem;
+            padding: 1rem 1.5rem;
+        }
+        
+        .upload-section {
+            padding: 1.5rem;
+        }
+        
+        .feature-box {
+            padding: 1.2rem;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
 
 # Main title
-st.markdown('<h1 class="main-title">📄 AI PDF Chatbot</h1>', unsafe_allow_html=True)
-st.markdown('<p class="subtitle">Upload your PDFs and chat with your documents using AI</p>', unsafe_allow_html=True)
+st.markdown('<h1 class="main-header">📄 AI PDF Chatbot</h1>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Professional Document Analysis with Enhanced AI Intelligence</p>', unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
     st.markdown("### ⚙️ Settings")
     
-    # Language selection
+    # Language selection for text-to-speech
     language = st.selectbox(
         "🌍 Select Language for Audio", 
         list(LANGUAGE_MAPPING.keys()),
-        help="Choose your preferred language for text-to-speech"
+        help="Choose your preferred language for text-to-speech playback"
     )
     
     st.markdown("---")
     st.markdown("### 📊 Status")
     if "vector_store_ready" in st.session_state and st.session_state.vector_store_ready:
-        st.success("PDF Processed Successfully")
+        st.markdown("🟢 **PDF Processed Successfully**")
     else:
-        st.info("Upload PDF to start")
+        st.markdown("🟡 **Upload PDF to start**")
     
-    # Stats
+    # Quick stats
     if "chat_history" in st.session_state and st.session_state.chat_history:
-        st.metric("Questions Asked", len(st.session_state.chat_history))
+        st.metric("💬 Questions Asked", len(st.session_state.chat_history))
     
+    # Info section
     st.markdown("---")
-    st.markdown("### ℹ️ About")
+    st.markdown("### ℹ️ Information")
     st.info(f"AI can read your documents and speak answers in {language}")
 
 # File upload section
-st.markdown('<div class="upload-container">', unsafe_allow_html=True)
+st.markdown('<div class="upload-section">', unsafe_allow_html=True)
 st.markdown("### 📁 Upload Your Documents")
-st.markdown("Drag and drop your PDF files here or click to browse")
+st.markdown("**Drag & drop your PDF files here or click to browse**")
 uploaded_files = st.file_uploader(
     "Choose PDF files", 
     type=["pdf"], 
@@ -340,64 +575,74 @@ st.markdown('</div>', unsafe_allow_html=True)
 def extract_text_from_pdfs(files):
     """Extract text from uploaded PDF files"""
     text = ""
+    total_pages = 0
     
     try:
         for file_idx, file in enumerate(files):
+            # Reset file pointer to beginning
             file.seek(0)
             
             try:
                 pdf_reader = PdfReader(file)
+                file_pages = len(pdf_reader.pages)
+                total_pages += file_pages
                 
                 for page_num, page in enumerate(pdf_reader.pages):
                     try:
                         page_text = page.extract_text()
-                        if page_text.strip():
+                        if page_text.strip():  # Only add non-empty pages
                             text += f"\n\n--- FILE: {file.name} | PAGE {page_num + 1} ---\n{page_text}"
-                    except Exception:
+                            
+                    except Exception as page_error:
                         continue
                         
-            except Exception:
+            except Exception as file_error:
                 continue
                 
         if not text.strip():
-            st.error("No text could be extracted from the PDFs. Please check if they contain readable text.")
+            st.error("❌ No text could be extracted from the uploaded PDFs. Please check if they contain readable text.")
             return None
             
         return text
         
     except Exception as e:
-        st.error(f"Error during PDF processing: {str(e)}")
+        st.error(f"❌ Critical error during PDF processing: {str(e)}")
         return None
 
 def preprocess_text(text):
-    """Clean and preprocess text"""
-    text = re.sub(r'\n\s*\n', '\n\n', text)
-    text = re.sub(r'[ \t]+', ' ', text)
+    # Improved text preprocessing
+    # Remove extra whitespace but preserve paragraph breaks
+    text = re.sub(r'\n\s*\n', '\n\n', text)  # Normalize paragraph breaks
+    text = re.sub(r'[ \t]+', ' ', text)  # Normalize spaces and tabs
     text = text.strip()
     return text
 
 def create_vector_store(text):
     """Create FAISS vector store from text"""
     if not text or not text.strip():
-        st.error("No text provided for vector store creation!")
+        st.error("❌ No text provided for vector store creation!")
         return 0
         
     try:
-        with st.spinner("Creating AI embeddings..."):
+        with st.spinner("🔄 Creating AI embeddings..."):
+            # Improved text splitting with better parameters
             text_splitter = RecursiveCharacterTextSplitter(
-                chunk_size=1500,
-                chunk_overlap=300,
+                chunk_size=1500,  # Smaller chunks for better precision
+                chunk_overlap=300,  # More overlap for better context preservation
                 length_function=len,
-                separators=["\n\n", "\n", ". ", " ", ""]
+                separators=["\n\n", "\n", ". ", " ", ""]  # Better separation logic
             )
             
             text_chunks = text_splitter.split_text(text)
+            
+            # Filter out very short chunks that might not be useful
             text_chunks = [chunk for chunk in text_chunks if len(chunk.strip()) > 50]
             
             if not text_chunks:
-                st.error("No valid text chunks created! Please check your PDF content.")
+                st.error("❌ No valid text chunks created! Please check your PDF content.")
                 return 0
             
+            # Initialize embeddings with error handling
             try:
                 embeddings = GoogleGenerativeAIEmbeddings(
                     model="models/embedding-001",
@@ -407,36 +652,42 @@ def create_vector_store(text):
                 vector_store = FAISS.from_texts(text_chunks, embedding=embeddings)
                 vector_store.save_local("faiss_index")
                 
+                # Return the actual chunk count
                 return len(text_chunks)
                 
             except Exception as embedding_error:
-                st.error(f"Error creating embeddings: {str(embedding_error)}")
+                st.error(f"❌ Error creating embeddings: {str(embedding_error)}")
+                st.error("🔍 This might be due to API key issues or network problems.")
                 return 0
                 
     except Exception as e:
-        st.error(f"Error in vector store creation: {str(e)}")
+        st.error(f"❌ Error in vector store creation: {str(e)}")
         return 0
 
 def get_conversational_chain():
-    """Create conversational chain"""
+    """Create conversational chain with error handling"""
     try:
+        # Enhanced prompt template with better instructions
         prompt_template = """
-        You are an intelligent AI assistant analyzing a document. Use the provided context to answer the question comprehensively.
+        You are an intelligent AI assistant analyzing a document. Use the provided context to answer the question as comprehensively as possible.
 
         INSTRUCTIONS:
         1. If you find relevant information in the context, provide a detailed and helpful answer
         2. If the exact answer isn't available, try to provide related information that might be helpful
-        3. Be conversational and helpful in your tone
+        3. If you can make reasonable inferences from the available information, do so while indicating they are inferences
         4. Only say "Answer is not available in the context" if there is absolutely no relevant information
+        5. Be conversational and helpful in your tone
+        6. If appropriate, suggest what additional information might be needed
 
         Context:
         {context}
 
         Question: {question}
 
-        Answer:
+        Helpful Answer:
         """
         
+        # Initialize model with error handling
         model = ChatGoogleGenerativeAI(
             model="gemini-2.0-flash-exp", 
             temperature=0.4,
@@ -449,175 +700,21 @@ def get_conversational_chain():
         return chain
         
     except Exception as e:
-        st.error(f"Error creating conversational chain: {str(e)}")
+        st.error(f"❌ Error creating conversational chain: {str(e)}")
         return None
 
-def process_user_message(user_input):
-    """Process user message"""
-    try:
-        with st.spinner("Processing your question..."):
-            if not os.path.exists("faiss_index"):
-                return "Vector store not found. Please upload and process a PDF first."
-            
-            embeddings = GoogleGenerativeAIEmbeddings(
-                model="models/embedding-001",
-                google_api_key=os.getenv("GOOGLE_API_KEY")
-            )
-            
-            try:
-                vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-            except Exception as load_error:
-                return f"Error loading vector store: {str(load_error)}. Please reprocess your PDF."
-            
-            docs = vector_store.similarity_search(user_input, k=6)
-            
-            chain = get_conversational_chain()
-            if not chain:
-                return "Error initializing AI model. Please check your API configuration."
-            
-            try:
-                response = chain({"input_documents": docs, "question": user_input}, return_only_outputs=True)
-                return response["output_text"]
-                
-            except Exception as chain_error:
-                return f"Error processing question: {str(chain_error)}"
-                
-    except Exception as e:
-        return f"Critical error: {str(e)}"
-
-def speak_text(text, language_code="en"):
-    """Convert text to speech"""
-    try:
-        tts = gTTS(text=text, lang=language_code)
-        temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
-        tts.save(temp_file.name)
-        st.audio(temp_file.name, format="audio/mp3", autoplay=True)
-        return True
-    except Exception as e:
-        st.error(f"Text-to-speech error: {str(e)}")
-        return False
-
-# Initialize chat history
-if "chat_history" not in st.session_state:
-    st.session_state.chat_history = []
-
-# PDF Processing
-if uploaded_files:
-    raw_text = extract_text_from_pdfs(uploaded_files)
+def enhance_query(query):
+    """Enhance user query with synonyms and related terms"""
+    # Simple query enhancement - you can make this more sophisticated
+    enhanced_terms = []
     
-    if raw_text:
-        processed_text = preprocess_text(raw_text)
-        
-        if processed_text:
-            chunk_count = create_vector_store(processed_text)
-            
-            if chunk_count > 0:
-                st.session_state.chunk_count = chunk_count
-                st.session_state.vector_store_ready = True
-                st.success(f"✅ PDFs processed successfully! Created {chunk_count} text chunks.")
-            else:
-                st.error("Failed to create vector store. Please try again.")
-
-# Chat Interface
-st.markdown("### 💬 Chat with your document")
-
-col1, col2 = st.columns([4, 1])
-
-with col1:
-    user_input = st.text_input(
-        "Ask a question about your document",
-        placeholder="What is this document about?",
-        label_visibility="collapsed"
-    )
-
-with col2:
-    ask_button = st.button("Ask", type="primary", use_container_width=True)
-
-# Process question
-if ask_button and user_input:
-    if "vector_store_ready" not in st.session_state:
-        st.warning("Please upload and process a PDF first!")
-    else:
-        response = process_user_message(user_input)
-        st.session_state.chat_history.append((user_input, response))
-
-# Display chat history
-if st.session_state.chat_history:
-    st.markdown("---")
+    # Add the original query
+    enhanced_terms.append(query)
     
-    for question, answer in reversed(st.session_state.chat_history):
-        st.markdown(f'''
-        <div class="user-message">
-            <strong>You:</strong> {question}
-        </div>
-        ''', unsafe_allow_html=True)
-        
-        st.markdown(f'''
-        <div class="bot-message">
-            <strong>AI:</strong> {answer}
-        </div>
-        ''', unsafe_allow_html=True)
-
-# Action buttons
-if st.session_state.chat_history:
-    st.markdown("---")
-    col1, col2, col3 = st.columns(3)
-    
-    with col1:
-        if st.button("🔊 Listen", use_container_width=True):
-            try:
-                lang_code = LANGUAGE_MAPPING[language]
-                response_text = st.session_state.chat_history[-1][1]
-                
-                if speak_text(response_text, lang_code):
-                    st.success(f"🎵 Playing audio in {language}")
-                else:
-                    st.error("Audio playback failed")
-                    
-            except Exception as e:
-                st.error(f"Audio failed: {str(e)}")
-    
-    with col2:
-        if st.button("💾 Export", use_container_width=True):
-            chat_text = "\n".join([f"Q: {chat[0]}\nA: {chat[1]}\n{'-'*50}\n" for chat in st.session_state.chat_history])
-            st.download_button(
-                "📥 Download", 
-                chat_text, 
-                file_name="chat_history.txt",
-                mime="text/plain",
-                use_container_width=True
-            )
-    
-    with col3:
-        if st.button("🗑️ Clear", use_container_width=True):
-            st.session_state.chat_history = []
-            if "vector_store_ready" in st.session_state:
-                del st.session_state.vector_store_ready
-            if "chunk_count" in st.session_state:
-                del st.session_state.chunk_count
-            st.rerun()
-
-# Feedback
-if st.session_state.chat_history:
-    st.markdown("---")
-    st.markdown("### ⭐ Feedback")
-    
-    feedback = st.radio(
-        "How was the response?",
-        ["⭐ Excellent", "👍 Good", "👎 Needs improvement"],
-        horizontal=True
-    )
-    
-    if feedback:
-        st.success(f"Thank you for the feedback: {feedback}")
-
-# Footer
-st.markdown(
-    """
-    <div class="footer">
-        <h3>📄 AI PDF Chatbot</h3>
-        <p>Upload your documents and get intelligent answers powered by AI</p>
-    </div>
-    """, 
-    unsafe_allow_html=True
-)
+    # Add variations (you can expand this with a proper thesaurus)
+    common_synonyms = {
+        "summary": ["overview", "abstract", "conclusion", "main points"],
+        "benefits": ["advantages", "positives", "pros", "value"],
+        "problems": ["issues", "challenges", "difficulties", "concerns"],
+        "cost": ["price", "expense", "budget", "financial"],
+        "process": ["procedure", "method", "steps",
