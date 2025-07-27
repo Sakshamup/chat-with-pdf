@@ -62,23 +62,23 @@ st.markdown("""
 <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
     
-    /* Main app background - Professional teal gradient */
+    /* Main app background - Professional dark teal gradient */
     .stApp {
-        background: linear-gradient(135deg, #f0fdfc 0%, #e6fffa 25%, #ccfbf1 50%, #99f6e4 75%, #5eead4 100%);
+        background: linear-gradient(135deg, #0f2027 0%, #203a43 25%, #2c5f5f 50%, #0ABAB5 75%, #14b8a6 100%);
         font-family: 'Inter', sans-serif;
         min-height: 100vh;
     }
     
     /* Main page container with sophisticated glass effect */
     .main .block-container {
-        background: rgba(255, 237, 243, 0.8);
-        backdrop-filter: blur(20px);
+        background: rgba(255, 237, 243, 0.15);
+        backdrop-filter: blur(25px);
         border-radius: 20px;
-        border: 1px solid rgba(10, 186, 181, 0.2);
+        border: 1px solid rgba(10, 186, 181, 0.3);
         padding: 2.5rem;
         margin: 1rem;
-        box-shadow: 0 25px 50px rgba(10, 186, 181, 0.15), 
-                    0 0 0 1px rgba(10, 186, 181, 0.1);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.3), 
+                    0 0 0 1px rgba(10, 186, 181, 0.2);
         position: relative;
     }
     
@@ -90,8 +90,8 @@ st.markdown("""
         left: 0;
         right: 0;
         bottom: 0;
-        background: radial-gradient(circle at 20% 80%, rgba(10, 186, 181, 0.08) 0%, transparent 50%),
-                    radial-gradient(circle at 80% 20%, rgba(255, 237, 243, 0.3) 0%, transparent 50%);
+        background: radial-gradient(circle at 20% 80%, rgba(10, 186, 181, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 237, 243, 0.1) 0%, transparent 50%);
         border-radius: 20px;
         pointer-events: none;
         z-index: -1;
@@ -100,37 +100,39 @@ st.markdown("""
     .main-header {
         font-size: 3rem;
         font-weight: 700;
-        background: linear-gradient(135deg, #0ABAB5 0%, #06a19b 50%, #047481 100%);
+        background: linear-gradient(135deg, #0ABAB5 0%, #14b8a6 50%, #10b981 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         text-align: center;
         margin-bottom: 0.5rem;
-        text-shadow: 0 4px 8px rgba(10, 186, 181, 0.2);
+        text-shadow: 0 4px 8px rgba(10, 186, 181, 0.3);
         letter-spacing: -0.02em;
+        filter: drop-shadow(0 2px 4px rgba(0, 0, 0, 0.3));
     }
     
     .sub-header {
         text-align: center;
-        color: #065f5c;
+        color: #ffffff;
         margin-bottom: 2rem;
         font-size: 1.2rem;
         font-weight: 500;
-        background: rgba(255, 237, 243, 0.9);
+        background: rgba(255, 237, 243, 0.15);
         padding: 1.2rem 2rem;
         border-radius: 15px;
         backdrop-filter: blur(15px);
-        border: 1px solid rgba(10, 186, 181, 0.2);
-        box-shadow: 0 8px 25px rgba(10, 186, 181, 0.1);
+        border: 1px solid rgba(10, 186, 181, 0.3);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
     
     .upload-section {
-        background: linear-gradient(135deg, rgba(255, 237, 243, 0.9) 0%, rgba(10, 186, 181, 0.08) 100%);
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.2) 0%, rgba(10, 186, 181, 0.15) 100%);
         padding: 2rem;
         border-radius: 16px;
-        border: 2px dashed rgba(10, 186, 181, 0.4);
+        border: 2px dashed rgba(10, 186, 181, 0.5);
         margin: 1.5rem 0;
-        box-shadow: 0 8px 30px rgba(10, 186, 181, 0.15);
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.3);
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
@@ -183,13 +185,13 @@ st.markdown("""
     }
     
     .bot-message {
-        background: linear-gradient(135deg, #fdf2f8 0%, #fce7f3 100%);
-        color: #7c2d92;
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.9) 0%, rgba(255, 237, 243, 0.8) 100%);
+        color: #065f5c;
         padding: 1.2rem 1.5rem;
         border-radius: 15px;
         margin: 1rem 0;
         border-left: 4px solid #0ABAB5;
-        box-shadow: 0 8px 25px rgba(255, 237, 243, 0.5);
+        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
         font-weight: 500;
         position: relative;
         overflow: hidden;
@@ -213,11 +215,11 @@ st.markdown("""
     
     /* Professional Sidebar */
     .css-1d391kg, .css-18e3th9, section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, rgba(255, 237, 243, 0.95) 0%, rgba(10, 186, 181, 0.1) 50%, rgba(255, 237, 243, 0.95) 100%);
+        background: linear-gradient(180deg, rgba(15, 32, 39, 0.9) 0%, rgba(32, 58, 67, 0.9) 50%, rgba(44, 95, 95, 0.9) 100%);
         backdrop-filter: blur(20px);
         border-radius: 15px;
-        border: 1px solid rgba(10, 186, 181, 0.2);
-        box-shadow: 0 15px 35px rgba(10, 186, 181, 0.15);
+        border: 1px solid rgba(10, 186, 181, 0.3);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
     }
     
     .css-1d391kg > div {
@@ -225,19 +227,20 @@ st.markdown("""
     }
     
     .feature-box {
-        background: linear-gradient(135deg, rgba(255, 237, 243, 0.8) 0%, rgba(10, 186, 181, 0.15) 100%);
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.2) 0%, rgba(10, 186, 181, 0.15) 100%);
         padding: 1.5rem;
         border-radius: 12px;
-        box-shadow: 0 6px 20px rgba(10, 186, 181, 0.15);
+        box-shadow: 0 6px 20px rgba(0, 0, 0, 0.25);
         margin: 0.8rem 0;
         text-align: center;
-        border: 1px solid rgba(10, 186, 181, 0.25);
+        border: 1px solid rgba(10, 186, 181, 0.3);
         backdrop-filter: blur(15px);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
-        color: #065f5c;
+        color: #ffffff;
         font-weight: 500;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.5);
     }
     
     .feature-box::before {
@@ -307,39 +310,41 @@ st.markdown("""
     /* Enhanced Input Field Styling */
     .stTextInput > div > div > input {
         border-radius: 12px;
-        border: 2px solid rgba(10, 186, 181, 0.3);
+        border: 2px solid rgba(10, 186, 181, 0.4);
         padding: 0.8rem 1.2rem;
-        background: rgba(255, 237, 243, 0.5);
-        color: #065f5c;
+        background: rgba(255, 237, 243, 0.2);
+        color: #ffffff;
         font-size: 1rem;
         font-weight: 500;
         backdrop-filter: blur(10px);
         transition: all 0.3s ease;
+        text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
     }
     
     .stTextInput > div > div > input::placeholder {
-        color: rgba(6, 95, 92, 0.6);
+        color: rgba(255, 255, 255, 0.7);
     }
     
     .stTextInput > div > div > input:focus {
         border-color: #0ABAB5;
-        box-shadow: 0 0 20px rgba(10, 186, 181, 0.3);
-        background: rgba(255, 237, 243, 0.8);
+        box-shadow: 0 0 20px rgba(10, 186, 181, 0.4);
+        background: rgba(255, 237, 243, 0.3);
         outline: none;
     }
     
     /* Professional Section Headers */
     h3 {
-        color: #065f5c;
+        color: #ffffff;
         font-weight: 600;
         font-size: 1.3rem;
-        background: linear-gradient(135deg, rgba(255, 237, 243, 0.9) 0%, rgba(10, 186, 181, 0.1) 100%);
+        background: linear-gradient(135deg, rgba(255, 237, 243, 0.2) 0%, rgba(10, 186, 181, 0.15) 100%);
         padding: 0.8rem 1.5rem;
         border-radius: 12px;
         backdrop-filter: blur(15px);
-        border: 1px solid rgba(10, 186, 181, 0.25);
-        box-shadow: 0 4px 15px rgba(10, 186, 181, 0.1);
+        border: 1px solid rgba(10, 186, 181, 0.3);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
         margin-bottom: 1rem;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.5);
     }
     
     /* Radio button container */
