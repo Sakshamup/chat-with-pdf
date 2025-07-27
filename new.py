@@ -603,152 +603,87 @@ def enhance_query(query):
     return " ".join(enhanced_terms)
 
 def process_user_message(user_input):
-    """Process user message with enhanced error handling and debugging"""
+    """Process user message with enhanced error handling"""
     try:
         with st.spinner("🤔 Thinking with enhanced intelligence..."):
             # Check if vector store exists
             if not os.path.exists("faiss_index"):
                 return "❌ Vector store not found. Please upload and process a PDF first."
             
-            # Debug: Check what files exist
-            st.write("🔍 Debug: Checking vector store files...")
-            faiss_files = []
-            for file in os.listdir("faiss_index"):
-                faiss_files.append(file)
-                st.write(f"   📁 Found: {file}")
-            
-            if not faiss_files:
-                return "❌ Vector store directory is empty. Please reprocess your PDF."
-            
             # Initialize embeddings
-            st.write("🧠 Initializing embeddings...")
-            try:
-                embeddings = GoogleGenerativeAIEmbeddings(
-                    model="models/embedding-001",
-                    google_api_key=os.getenv("GOOGLE_API_KEY")
-                )
-                st.write("✅ Embeddings initialized successfully")
-            except Exception as emb_error:
-                return f"❌ Error initializing embeddings: {str(emb_error)}"
+            embeddings = GoogleGenerativeAIEmbeddings(
+                model="models/embedding-001",
+                google_api_key=os.getenv("GOOGLE_API_KEY")
+            )
             
             # Load vector store
-            st.write("📚 Loading vector store...")
             try:
                 vector_store = FAISS.load_local("faiss_index", embeddings, allow_dangerous_deserialization=True)
-                st.write("✅ Vector store loaded successfully")
-                
-                # Debug: Check vector store info
-                if hasattr(vector_store, 'index') and hasattr(vector_store.index, 'ntotal'):
-                    total_vectors = vector_store.index.ntotal
-                    st.write(f"📊 Vector store contains {total_vectors} vectors")
-                    
-                    if total_vectors == 0:
-                        return "❌ Vector store is empty. Please reprocess your PDF."
-                        
             except Exception as load_error:
-                st.write(f"❌ Vector store loading error: {str(load_error)}")
                 return f"❌ Error loading vector store: {str(load_error)}. Please reprocess your PDF."
             
-            # Enhanced query processing
-            st.write(f"🔍 Searching for: '{user_input}'")
+            # Enhanced query
             enhanced_query = enhance_query(user_input)
-            st.write(f"🔍 Enhanced query: '{enhanced_query}'")
             
-            # Get documents with debugging
+            # Get more documents for better context (fixed at 6)
             num_docs = 6
-            try:
-                docs = vector_store.similarity_search(enhanced_query, k=num_docs)
-                st.write(f"📄 Found {len(docs)} documents from enhanced search")
-                
-                # Show snippet of found documents for debugging
-                for i, doc in enumerate(docs[:2]):  # Show first 2 docs
-                    snippet = doc.page_content[:200] + "..." if len(doc.page_content) > 200 else doc.page_content
-                    st.write(f"   📝 Doc {i+1}: {snippet}")
-                
-            except Exception as search_error:
-                st.write(f"❌ Search error: {str(search_error)}")
-                return f"❌ Error searching documents: {str(search_error)}"
+            docs = vector_store.similarity_search(enhanced_query, k=num_docs)
         
             # Also try with the original query if enhanced query doesn't yield good results
             if len(docs) < num_docs:
-                st.write("🔍 Trying original query...")
-                try:
-                    additional_docs = vector_store.similarity_search(user_input, k=num_docs)
-                    st.write(f"📄 Found {len(additional_docs)} additional documents")
-                    
-                    # Combine and deduplicate
-                    all_docs = docs + additional_docs
-                    seen_content = set()
-                    unique_docs = []
-                    for doc in all_docs:
-                        if doc.page_content not in seen_content:
-                            unique_docs.append(doc)
-                            seen_content.add(doc.page_content)
-                    docs = unique_docs[:num_docs]
-                    st.write(f"📄 Total unique documents: {len(docs)}")
-                except Exception as additional_search_error:
-                    st.write(f"⚠️ Additional search failed: {str(additional_search_error)}")
+                additional_docs = vector_store.similarity_search(user_input, k=num_docs)
+                # Combine and deduplicate
+                all_docs = docs + additional_docs
+                seen_content = set()
+                unique_docs = []
+                for doc in all_docs:
+                    if doc.page_content not in seen_content:
+                        unique_docs.append(doc)
+                        seen_content.add(doc.page_content)
+                docs = unique_docs[:num_docs]
             
             # If still no good matches, try with more relaxed search
             if len(docs) < 3:
-                st.write("🔍 Trying word-by-word search...")
+                # Try searching with individual words from the query
                 words = user_input.split()
                 for word in words:
                     if len(word) > 3:  # Only search meaningful words
-                        try:
-                            word_docs = vector_store.similarity_search(word, k=2)
-                            docs.extend(word_docs)
-                            st.write(f"   🔤 Word '{word}': found {len(word_docs)} docs")
-                        except Exception as word_search_error:
-                            st.write(f"   ⚠️ Word search failed for '{word}': {str(word_search_error)}")
-            
-            # Final document count
-            st.write(f"📚 Using {len(docs)} documents for answer generation")
-            
-            if not docs:
-                return "❌ No relevant documents found. Please try rephrasing your question or check if your PDF was processed correctly."
+                        word_docs = vector_store.similarity_search(word, k=2)
+                        docs.extend(word_docs)
             
             # Get conversational chain
-            st.write("🤖 Initializing AI chain...")
             chain = get_conversational_chain()
             if not chain:
                 return "❌ Error initializing AI model. Please check your API configuration."
             
-            st.write("✅ AI chain ready")
-            
             try:
-                st.write("🧠 Generating answer...")
                 response = chain({"input_documents": docs, "question": user_input}, return_only_outputs=True)
                 answer = response["output_text"]
                 
-                st.write(f"📝 Generated answer length: {len(answer)} characters")
-                
                 # If we still get a "not available" response, try a fallback approach
                 if "not available in the context" in answer.lower() or "cannot find" in answer.lower():
-                    st.write("🔄 Trying fallback approach...")
                     # Try a more general search
-                    try:
-                        general_docs = vector_store.similarity_search(user_input, k=10)
-                        if general_docs:
-                            fallback_response = chain({"input_documents": general_docs, "question": f"Based on the available information, what can you tell me about: {user_input}"}, return_only_outputs=True)
-                            fallback_answer = fallback_response["output_text"]
-                            if "not available" not in fallback_answer.lower():
-                                answer = fallback_answer
-                                st.write("✅ Fallback approach succeeded")
-                    except Exception as fallback_error:
-                        st.write(f"⚠️ Fallback approach failed: {str(fallback_error)}")
+                    general_docs = vector_store.similarity_search(user_input, k=10)
+                    if general_docs:
+                        fallback_response = chain({"input_documents": general_docs, "question": f"Based on the available information, what can you tell me about: {user_input}"}, return_only_outputs=True)
+                        fallback_answer = fallback_response["output_text"]
+                        if "not available" not in fallback_answer.lower():
+                            answer = fallback_answer
                 
                 return answer
                 
             except Exception as chain_error:
-                return f"❌ Error processing question with AI: {str(chain_error)}"
+                return f"❌ Error processing question: {str(chain_error)}"
                 
     except Exception as e:
-        return f"❌ Critical error in process_user_message: {str(e)}"
+        return f"❌ Critical error: {str(e)}"
 
 def translate_text(text, target_language):
-    """Translate text to target language using Google Translate with multiple fallback methods"""
+    """Translate text to target language using Google Translate"""
     try:
+        # Initialize translator
+        translator = Translator()
+        
         # Don't translate if target is English
         if target_language == "en":
             return text
@@ -757,127 +692,18 @@ def translate_text(text, target_language):
         text_to_translate = text.strip()
         if not text_to_translate:
             return text
+            
+        # Perform translation silently
+        translated = translator.translate(text_to_translate, dest=target_language)
         
-        # Method 1: Try with fresh Translator instance
-        try:
-            translator = Translator()
-            result = translator.translate(text_to_translate, dest=target_language)
+        if translated and translated.text:
+            translated_text = translated.text.strip()
+            return translated_text
+        else:
+            return text
             
-            # Multiple ways to extract the translated text
-            if result:
-                # Try direct access
-                if hasattr(result, 'text') and result.text:
-                    return result.text.strip()
-                
-                # Try as string conversion
-                translated_str = str(result)
-                if translated_str and translated_str != str(result.__class__):
-                    return translated_str.strip()
-                
-                # Try accessing via dictionary
-                if hasattr(result, '__dict__'):
-                    result_dict = result.__dict__
-                    if 'text' in result_dict and result_dict['text']:
-                        return result_dict['text'].strip()
-                    
-                    # Look for other possible text fields
-                    for key in ['translated_text', 'translation', 'result']:
-                        if key in result_dict and result_dict[key]:
-                            return str(result_dict[key]).strip()
-            
-        except Exception as e1:
-            st.write(f"🔄 Method 1 failed: {str(e1)[:100]}... Trying alternative method...")
-        
-        # Method 2: Try with different service URLs
-        try:
-            for service_url in ['translate.googleapis.com', 'translate.google.co.in', 'translate.google.com']:
-                try:
-                    translator = Translator(service_urls=[service_url])
-                    result = translator.translate(text_to_translate, dest=target_language)
-                    
-                    if result and hasattr(result, 'text') and result.text:
-                        return result.text.strip()
-                        
-                except Exception:
-                    continue
-                    
-        except Exception as e2:
-            st.write(f"🔄 Method 2 failed: {str(e2)[:100]}... Trying method 3...")
-        
-        # Method 3: Try chunking the text
-        try:
-            translator = Translator()
-            
-            # Split into smaller chunks
-            max_chunk_size = 500
-            words = text_to_translate.split()
-            chunks = []
-            current_chunk = []
-            current_length = 0
-            
-            for word in words:
-                if current_length + len(word) + 1 <= max_chunk_size:
-                    current_chunk.append(word)
-                    current_length += len(word) + 1
-                else:
-                    if current_chunk:
-                        chunks.append(' '.join(current_chunk))
-                    current_chunk = [word]
-                    current_length = len(word)
-            
-            if current_chunk:
-                chunks.append(' '.join(current_chunk))
-            
-            # Translate each chunk
-            translated_chunks = []
-            for chunk in chunks:
-                try:
-                    result = translator.translate(chunk, dest=target_language)
-                    if result and hasattr(result, 'text') and result.text:
-                        translated_chunks.append(result.text)
-                    else:
-                        translated_chunks.append(chunk)  # Keep original if translation fails
-                except:
-                    translated_chunks.append(chunk)  # Keep original if translation fails
-            
-            if translated_chunks:
-                return ' '.join(translated_chunks).strip()
-                
-        except Exception as e3:
-            st.write(f"🔄 Method 3 failed: {str(e3)[:100]}... Using Google Generative AI...")
-        
-        # Method 4: Use Google Generative AI for translation as fallback
-        try:
-            # Create a simple translation prompt
-            translation_prompt = f"""
-            Please translate the following text from English to {target_language}. 
-            Provide only the translation, no explanations or additional text.
-            
-            Text to translate: {text_to_translate}
-            """
-            
-            model = ChatGoogleGenerativeAI(
-                model="gemini-2.0-flash-exp", 
-                temperature=0.1,  # Low temperature for consistent translation
-                google_api_key=os.getenv("GOOGLE_API_KEY")
-            )
-            
-            ai_translation = model.invoke(translation_prompt)
-            if hasattr(ai_translation, 'content') and ai_translation.content:
-                translated_text = ai_translation.content.strip()
-                # Remove any quotes or extra formatting
-                translated_text = translated_text.strip('"\'')
-                return translated_text
-                
-        except Exception as e4:
-            st.write(f"🔄 AI translation failed: {str(e4)[:100]}...")
-        
-        # If all methods fail, return original text
-        st.warning(f"⚠️ All translation methods failed. Using original English text.")
-        return text
-        
     except Exception as e:
-        st.error(f"❌ Critical translation error: {str(e)}")
+        st.error(f"❌ Translation error: {str(e)}")
         return text
 
 def speak_text(text, language_code):
@@ -955,30 +781,20 @@ if ask_button and user_input:
             
             with st.spinner(f"🔄 Translating and preparing audio in {language}..."):
                 try:
-                    # Translate the response with better error handling
+                    # Translate the response silently
                     translated_response = translate_text(response, target_lang)
                     
-                    # Check if translation was successful (not same as original)
-                    if translated_response and translated_response != response:
-                        # Store the translated response
-                        st.session_state.chat_history.append((user_input, translated_response))
-                        
-                        # Automatically speak the translated response
-                        if speak_text(translated_response, lang_code):
-                            st.success(f"🎵✨ Response translated to {language} and spoken automatically!")
-                        else:
-                            st.warning(f"✅ Response translated to {language} but audio playback failed.")
+                    # Store the translated response
+                    st.session_state.chat_history.append((user_input, translated_response))
+                    
+                    # Automatically speak the translated response
+                    if speak_text(translated_response, lang_code):
+                        st.success(f"🎵✨ Response translated to {language} and spoken automatically!")
                     else:
-                        # Translation failed or returned same text, use original
-                        st.session_state.chat_history.append((user_input, response))
-                        st.warning(f"⚠️ Translation to {language} failed. Showing original English response.")
-                        
-                        # Try to speak original response in English
-                        if speak_text(response, "en"):
-                            st.info("🎵 Playing original response in English.")
+                        st.warning(f"✅ Response translated to {language} but audio playback failed.")
                         
                 except Exception as trans_error:
-                    st.warning(f"⚠️ Translation error: {str(trans_error)}. Using original response.")
+                    st.warning(f"⚠️ Translation failed: {str(trans_error)}. Showing original response.")
                     st.session_state.chat_history.append((user_input, response))
         else:
             # Store original response
