@@ -601,7 +601,15 @@ if ask_button and user_input:
         st.warning("⚠️ Please upload and process a PDF first!")
     else:
         response = process_user_message(user_input)
-        st.session_state.chat_history.append((user_input, response))
+        
+        # Translate response if enabled
+        if translate_responses and language != "English":
+            target_lang = LANGUAGE_MAPPING[language]["translate"]
+            with st.spinner(f"🔄 Translating to {language}..."):
+                translated_response = translate_text(response, target_lang)
+                st.session_state.chat_history.append((user_input, translated_response))
+        else:
+            st.session_state.chat_history.append((user_input, response))
 
 # Display chat history with bright styling
 if st.session_state.chat_history:
@@ -635,14 +643,23 @@ if st.session_state.chat_history:
         st.markdown('<div class="feature-box">', unsafe_allow_html=True)
         if st.button("🔊🎵 Listen Magic", use_container_width=True):
             try:
-                tts = gTTS(text=st.session_state.chat_history[-1][1], lang=LANGUAGE_MAPPING[language])
+                # Get the language code correctly from the dictionary
+                if isinstance(LANGUAGE_MAPPING[language], dict):
+                    lang_code = LANGUAGE_MAPPING[language]["code"]
+                else:
+                    lang_code = LANGUAGE_MAPPING[language]
+                    
+                response_text = st.session_state.chat_history[-1][1]
+                tts = gTTS(text=response_text, lang=lang_code)
                 temp_file = tempfile.NamedTemporaryFile(delete=False, suffix=".mp3")
                 tts.save(temp_file.name)
                 st.audio(temp_file.name, format="audio/mp3")
                 st.balloons()  # Fun animation!
-                st.success("🎵✨ Audio is ready to enchant you!")
+                st.success(f"🎵✨ Audio is ready in {language}!")
             except Exception as e:
                 st.error(f"Audio magic failed: {str(e)}")
+                # Debug info
+                st.error(f"Debug: Language = {language}, Mapping = {LANGUAGE_MAPPING.get(language, 'Not found')}")
         st.markdown('</div>', unsafe_allow_html=True)
     
     with col2:
