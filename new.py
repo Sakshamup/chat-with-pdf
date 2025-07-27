@@ -57,15 +57,31 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Professional Red-Orange CSS Theme
+# Enhanced Professional Red-Orange CSS Theme with Attractive Fonts
 st.markdown("""
 <style>
-    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@200;300;400;500;600;700;800;900&family=Inter:wght@200;300;400;500;600;700;800;900&family=Playfair+Display:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@200;300;400;500;600;700;800&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+    
+    /* Custom font variables for easy changes */
+    :root {
+        --font-primary: 'Poppins', -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-secondary: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+        --font-display: 'Playfair Display', Georgia, serif;
+        --font-mono: 'JetBrains Mono', 'Fira Code', monospace;
+        --font-modern: 'Space Grotesk', -apple-system, BlinkMacSystemFont, sans-serif;
+        
+        --text-shadow-soft: 0 2px 8px rgba(0, 0, 0, 0.15);
+        --text-shadow-strong: 0 4px 12px rgba(0, 0, 0, 0.3);
+        --text-shadow-glow: 0 0 20px rgba(255, 87, 34, 0.4);
+    }
     
     /* Main app background - Professional red-orange gradient */
     .stApp {
         background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 25%, #4a1810 50%, #6b2c17 75%, #8b3a1e 100%);
-        font-family: 'Inter', sans-serif;
+        font-family: var(--font-primary);
+        font-weight: 400;
+        letter-spacing: 0.3px;
+        line-height: 1.6;
     }
     
     /* Main page container with sophisticated glass effect */
@@ -97,30 +113,50 @@ st.markdown("""
     }
     
     .main-header {
-        font-size: 3rem;
-        font-weight: 700;
-        background: linear-gradient(135deg, #ff5722 0%, #f44336 50%, #d32f2f 100%);
+        font-family: var(--font-display);
+        font-size: 3.5rem;
+        font-weight: 800;
+        background: linear-gradient(135deg, #ff5722 0%, #f44336 30%, #e91e63 70%, #d32f2f 100%);
         -webkit-background-clip: text;
         -webkit-text-fill-color: transparent;
         background-clip: text;
         text-align: center;
         margin-bottom: 0.5rem;
-        text-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
-        letter-spacing: -0.02em;
+        text-shadow: var(--text-shadow-glow);
+        letter-spacing: -0.03em;
+        line-height: 1.1;
+        font-style: italic;
+        position: relative;
+    }
+    
+    .main-header::after {
+        content: '';
+        position: absolute;
+        bottom: -10px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 100px;
+        height: 3px;
+        background: linear-gradient(90deg, transparent, #ff5722, transparent);
+        border-radius: 2px;
     }
     
     .sub-header {
+        font-family: var(--font-modern);
         text-align: center;
         color: #ffffff;
         margin-bottom: 2rem;
-        font-size: 1.2rem;
-        font-weight: 400;
+        font-size: 1.3rem;
+        font-weight: 500;
         background: rgba(255, 87, 34, 0.1);
-        padding: 1.2rem 2rem;
-        border-radius: 15px;
+        padding: 1.5rem 2.5rem;
+        border-radius: 18px;
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 87, 34, 0.2);
         box-shadow: 0 8px 25px rgba(255, 87, 34, 0.1);
+        letter-spacing: 0.5px;
+        text-shadow: var(--text-shadow-soft);
+        line-height: 1.4;
     }
     
     .upload-section {
@@ -133,6 +169,22 @@ st.markdown("""
         transition: all 0.3s ease;
         position: relative;
         overflow: hidden;
+    }
+    
+    .upload-section h3 {
+        font-family: var(--font-modern);
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        color: #ffffff;
+        text-shadow: var(--text-shadow-soft);
+    }
+    
+    .upload-section p {
+        font-family: var(--font-secondary);
+        font-weight: 400;
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.05rem;
+        letter-spacing: 0.2px;
     }
     
     .upload-section::before {
@@ -153,16 +205,30 @@ st.markdown("""
     }
     
     .user-message {
+        font-family: var(--font-secondary);
         background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
         color: white;
-        padding: 1.2rem 1.5rem;
-        border-radius: 15px;
+        padding: 1.4rem 1.8rem;
+        border-radius: 18px;
         margin: 1rem 0;
         border-left: 4px solid #d84315;
         box-shadow: 0 8px 25px rgba(255, 87, 34, 0.3);
         font-weight: 500;
         position: relative;
         overflow: hidden;
+        font-size: 1.05rem;
+        line-height: 1.5;
+        letter-spacing: 0.2px;
+        text-shadow: var(--text-shadow-soft);
+    }
+    
+    .user-message strong {
+        font-family: var(--font-modern);
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        text-shadow: var(--text-shadow-strong);
     }
     
     .user-message::before {
@@ -182,16 +248,31 @@ st.markdown("""
     }
     
     .bot-message {
+        font-family: var(--font-secondary);
         background: linear-gradient(135deg, #bf360c 0%, #d84315 100%);
         color: white;
-        padding: 1.2rem 1.5rem;
-        border-radius: 15px;
+        padding: 1.4rem 1.8rem;
+        border-radius: 18px;
         margin: 1rem 0;
         border-left: 4px solid #8d2a0e;
         box-shadow: 0 8px 25px rgba(191, 54, 12, 0.3);
-        font-weight: 500;
+        font-weight: 400;
         position: relative;
         overflow: hidden;
+        font-size: 1.05rem;
+        line-height: 1.6;
+        letter-spacing: 0.2px;
+        text-shadow: var(--text-shadow-soft);
+    }
+    
+    .bot-message strong {
+        font-family: var(--font-modern);
+        font-weight: 700;
+        font-size: 1.1rem;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        color: #ffeb3b;
+        text-shadow: var(--text-shadow-strong);
     }
     
     .bot-message::before {
@@ -217,6 +298,7 @@ st.markdown("""
         border-radius: 15px;
         border: 1px solid rgba(255, 87, 34, 0.2);
         box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
+        font-family: var(--font-secondary);
     }
     
     .css-1d391kg > div {
@@ -224,9 +306,10 @@ st.markdown("""
     }
     
     .feature-box {
+        font-family: var(--font-modern);
         background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
-        padding: 1.5rem;
-        border-radius: 12px;
+        padding: 1.8rem;
+        border-radius: 14px;
         box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
         margin: 0.8rem 0;
         text-align: center;
@@ -235,6 +318,8 @@ st.markdown("""
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
+        font-weight: 500;
+        letter-spacing: 0.3px;
     }
     
     .feature-box::before {
@@ -261,18 +346,21 @@ st.markdown("""
     
     /* Professional Button Styling */
     .stButton > button {
+        font-family: var(--font-modern);
         background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
         color: white;
         border: none;
-        border-radius: 12px;
-        padding: 0.8rem 2rem;
+        border-radius: 14px;
+        padding: 1rem 2.5rem;
         font-weight: 600;
-        font-size: 0.95rem;
+        font-size: 1rem;
         box-shadow: 0 6px 20px rgba(255, 87, 34, 0.3);
         transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
         position: relative;
         overflow: hidden;
-        letter-spacing: 0.5px;
+        letter-spacing: 0.8px;
+        text-transform: uppercase;
+        text-shadow: var(--text-shadow-soft);
     }
     
     .stButton > button::before {
@@ -303,19 +391,24 @@ st.markdown("""
     
     /* Enhanced Input Field Styling */
     .stTextInput > div > div > input {
-        border-radius: 12px;
+        font-family: var(--font-secondary);
+        border-radius: 14px;
         border: 2px solid rgba(255, 87, 34, 0.3);
-        padding: 0.8rem 1.2rem;
+        padding: 1rem 1.5rem;
         background: rgba(255, 255, 255, 0.1);
         color: #ffffff;
-        font-size: 1rem;
+        font-size: 1.05rem;
         font-weight: 500;
         backdrop-filter: blur(10px);
         transition: all 0.3s ease;
+        letter-spacing: 0.3px;
+        text-shadow: var(--text-shadow-soft);
     }
     
     .stTextInput > div > div > input::placeholder {
         color: rgba(255, 255, 255, 0.6);
+        font-style: italic;
+        font-weight: 400;
     }
     
     .stTextInput > div > div > input:focus {
@@ -327,33 +420,46 @@ st.markdown("""
     
     /* Professional Section Headers */
     h3 {
+        font-family: var(--font-modern);
         color: #ffffff;
-        font-weight: 600;
-        font-size: 1.3rem;
+        font-weight: 700;
+        font-size: 1.4rem;
         background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
-        padding: 0.8rem 1.5rem;
-        border-radius: 12px;
+        padding: 1rem 1.8rem;
+        border-radius: 14px;
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 87, 34, 0.25);
         box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
         margin-bottom: 1rem;
+        letter-spacing: 0.5px;
+        text-shadow: var(--text-shadow-soft);
+        text-transform: capitalize;
     }
     
     /* Radio button container */
     .stRadio > div {
+        font-family: var(--font-secondary);
         background: rgba(255, 87, 34, 0.1);
-        padding: 1.2rem;
-        border-radius: 12px;
+        padding: 1.5rem;
+        border-radius: 14px;
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 87, 34, 0.2);
         box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
     }
     
+    .stRadio label {
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        color: #ffffff;
+        text-shadow: var(--text-shadow-soft);
+    }
+    
     /* Metrics styling */
     .css-1r6slb0 {
+        font-family: var(--font-modern);
         background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
-        border-radius: 12px;
-        padding: 1.2rem;
+        border-radius: 14px;
+        padding: 1.5rem;
         box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 87, 34, 0.2);
@@ -364,10 +470,11 @@ st.markdown("""
     section[data-testid="stFileUploader"],
     .css-1cpxqw2 > div,
     div[data-testid="stFileUploader"] {
+        font-family: var(--font-secondary);
         background: linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%) !important;
-        border-radius: 16px !important;
+        border-radius: 18px !important;
         border: 2px dashed rgba(255, 87, 34, 0.4) !important;
-        padding: 2rem !important;
+        padding: 2.5rem !important;
         box-shadow: 0 8px 25px rgba(255, 87, 34, 0.15) !important;
         transition: all 0.3s ease !important;
         position: relative !important;
@@ -385,18 +492,24 @@ st.markdown("""
     div[data-testid="stFileUploader"] small {
         color: #ffffff !important;
         font-weight: 500 !important;
+        letter-spacing: 0.2px !important;
+        text-shadow: var(--text-shadow-soft) !important;
     }
     
     /* Browse files button styling */
     div[data-testid="stFileUploader"] button {
+        font-family: var(--font-modern) !important;
         background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%) !important;
         color: white !important;
         border: none !important;
-        border-radius: 10px !important;
-        padding: 0.8rem 1.8rem !important;
-        font-weight: 600 !important;
+        border-radius: 12px !important;
+        padding: 1rem 2rem !important;
+        font-weight: 700 !important;
         box-shadow: 0 6px 20px rgba(255, 87, 34, 0.3) !important;
         transition: all 0.3s ease !important;
+        letter-spacing: 0.5px !important;
+        text-transform: uppercase !important;
+        text-shadow: var(--text-shadow-soft) !important;
     }
     
     div[data-testid="stFileUploader"] button:hover {
@@ -414,26 +527,33 @@ st.markdown("""
     /* Sidebar content styling */
     .css-18e3th9 {
         background: transparent !important;
-        padding: 1.2rem;
+        padding: 1.5rem;
         border-radius: 15px;
+        font-family: var(--font-secondary);
     }
     
     /* Sidebar text styling */
     section[data-testid="stSidebar"] h3 {
+        font-family: var(--font-modern);
         background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.15) 100%);
-        padding: 0.8rem 1.2rem;
-        border-radius: 10px;
+        padding: 1rem 1.5rem;
+        border-radius: 12px;
         backdrop-filter: blur(20px);
         border: 1px solid rgba(255, 87, 34, 0.25);
         color: #ffffff;
         box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        text-transform: uppercase;
+        text-shadow: var(--text-shadow-soft);
     }
     
     /* Sidebar metrics styling */
     section[data-testid="stSidebar"] .css-1r6slb0 {
+        font-family: var(--font-modern);
         background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
-        border-radius: 10px;
-        padding: 1rem;
+        border-radius: 12px;
+        padding: 1.2rem;
         box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
         backdrop-filter: blur(15px);
         border: 1px solid rgba(255, 87, 34, 0.2);
@@ -441,60 +561,101 @@ st.markdown("""
     
     /* Sidebar info box styling */
     section[data-testid="stSidebar"] .stAlert {
+        font-family: var(--font-secondary);
         background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.15) 100%);
         color: #ffffff;
-        border-radius: 10px;
+        border-radius: 12px;
         border: 1px solid rgba(255, 87, 34, 0.25);
         backdrop-filter: blur(15px);
         box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        text-shadow: var(--text-shadow-soft);
     }
     
     /* Sidebar markdown text */
     section[data-testid="stSidebar"] p, 
     section[data-testid="stSidebar"] .stMarkdown {
+        font-family: var(--font-secondary);
         color: #ffffff;
         font-weight: 400;
+        letter-spacing: 0.2px;
+        line-height: 1.5;
+        text-shadow: var(--text-shadow-soft);
     }
 
     /* Enhanced Success, Error, and Warning messages */
     .stSuccess {
+        font-family: var(--font-secondary);
         background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
         color: white;
-        border-radius: 12px;
+        border-radius: 14px;
         border: 1px solid rgba(76, 175, 80, 0.3);
         box-shadow: 0 6px 20px rgba(76, 175, 80, 0.2);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        text-shadow: var(--text-shadow-soft);
     }
     
     .stError {
+        font-family: var(--font-secondary);
         background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
         color: white;
-        border-radius: 12px;
+        border-radius: 14px;
         border: 1px solid rgba(244, 67, 54, 0.3);
         box-shadow: 0 6px 20px rgba(244, 67, 54, 0.2);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        text-shadow: var(--text-shadow-soft);
     }
     
     .stWarning {
+        font-family: var(--font-secondary);
         background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
         color: white;
-        border-radius: 12px;
+        border-radius: 14px;
         border: 1px solid rgba(255, 152, 0, 0.3);
         box-shadow: 0 6px 20px rgba(255, 152, 0, 0.2);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+        text-shadow: var(--text-shadow-soft);
+    }
+    
+    /* Selectbox styling */
+    .stSelectbox > div > div {
+        font-family: var(--font-secondary);
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        border-radius: 12px;
+        border: 2px solid rgba(255, 87, 34, 0.3);
+        backdrop-filter: blur(10px);
+        font-weight: 500;
+        letter-spacing: 0.2px;
+    }
+    
+    .stSelectbox label {
+        font-family: var(--font-modern);
+        color: #ffffff;
+        font-weight: 600;
+        letter-spacing: 0.3px;
+        text-shadow: var(--text-shadow-soft);
     }
     
     /* Custom scrollbar */
     ::-webkit-scrollbar {
-        width: 8px;
-        height: 8px;
+        width: 10px;
+        height: 10px;
     }
     
     ::-webkit-scrollbar-track {
         background: rgba(255, 87, 34, 0.1);
-        border-radius: 4px;
+        border-radius: 6px;
     }
     
     ::-webkit-scrollbar-thumb {
         background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
-        border-radius: 4px;
+        border-radius: 6px;
+        box-shadow: 0 2px 8px rgba(255, 87, 34, 0.3);
     }
     
     ::-webkit-scrollbar-thumb:hover {
@@ -507,25 +668,45 @@ st.markdown("""
         100% { transform: rotate(360deg); }
     }
     
+    /* Enhanced font smoothing */
+    * {
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+        text-rendering: optimizeLegibility;
+    }
+    
     /* Responsive design improvements */
     @media (max-width: 768px) {
         .main-header {
-            font-size: 2.2rem;
+            font-size: 2.5rem;
         }
         
         .sub-header {
-            font-size: 1rem;
-            padding: 1rem 1.5rem;
+            font-size: 1.1rem;
+            padding: 1.2rem 1.8rem;
         }
         
         .upload-section {
-            padding: 1.5rem;
+            padding: 1.8rem;
         }
         
         .feature-box {
-            padding: 1.2rem;
+            padding: 1.5rem;
+        }
+        
+        .user-message, .bot-message {
+            padding: 1.2rem 1.5rem;
+            font-size: 1rem;
         }
     }
+    
+    /* Additional font weight utilities */
+    .font-light { font-weight: 300; }
+    .font-normal { font-weight: 400; }
+    .font-medium { font-weight: 500; }
+    .font-semibold { font-weight: 600; }
+    .font-bold { font-weight: 700; }
+    .font-extrabold { font-weight: 800; }
 </style>
 """, unsafe_allow_html=True)
 
@@ -960,17 +1141,17 @@ if st.session_state.chat_history:
         if feedback:
             st.success(f"✅ Thank you for the feedback: {feedback}")
 
-# Footer
+# Enhanced Footer with beautiful typography
 st.markdown("---")
 st.markdown(
     """
-    <div style='text-align: center; color: #ffffff; padding: 2rem; background: linear-gradient(135deg, #ff5722 0%, #f4511e 50%, #d84315 100%); border-radius: 15px; margin-top: 2rem; box-shadow: 0 8px 30px rgba(255, 87, 34, 0.3); position: relative; overflow: hidden;'>
-        <div style='position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%); pointer-events: none;'></div>
-        <h3 style='margin: 0; font-size: 1.8rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); position: relative; z-index: 1;'>📄 AI PDF Chatbot</h3>
-        <p style='font-size: 1.1rem; margin: 1rem 0; font-weight: 500; position: relative; z-index: 1;'>
+    <div style='text-align: center; color: #ffffff; padding: 3rem; background: linear-gradient(135deg, #ff5722 0%, #f4511e 30%, #e91e63 70%, #d32f2f 100%); border-radius: 20px; margin-top: 2rem; box-shadow: 0 15px 40px rgba(255, 87, 34, 0.4); position: relative; overflow: hidden; font-family: var(--font-display);'>
+        <div style='position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.15) 0%, transparent 60%), radial-gradient(circle at 70% 30%, rgba(255, 255, 255, 0.1) 0%, transparent 50%); pointer-events: none;'></div>
+        <h3 style='margin: 0; font-size: 2.2rem; font-weight: 800; text-shadow: 0 4px 12px rgba(0,0,0,0.4); position: relative; z-index: 1; font-style: italic; letter-spacing: -0.02em;'>📄 AI PDF Chatbot</h3>
+        <p style='font-size: 1.3rem; margin: 1.2rem 0; font-weight: 600; position: relative; z-index: 1; font-family: var(--font-modern); letter-spacing: 0.5px; text-transform: uppercase;'>
             <strong>Upload PDF → Ask Questions → Get Intelligent Answers</strong>
         </p>
-        <p style='font-size: 0.95rem; opacity: 0.9; margin: 0; position: relative; z-index: 1;'>
+        <p style='font-size: 1.1rem; opacity: 0.95; margin: 0; position: relative; z-index: 1; font-family: var(--font-secondary); font-weight: 400; font-style: italic; letter-spacing: 0.3px;'>
             Experience next-generation document analysis with professional AI assistance
         </p>
     </div>
