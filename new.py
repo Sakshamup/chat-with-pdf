@@ -15,6 +15,22 @@ import re
 # Load environment variables
 load_dotenv()
 
+# Language mapping for gTTS (text-to-speech)
+LANGUAGE_MAPPING = {
+    "English": "en",
+    "Hindi": "hi", 
+    "Spanish": "es",
+    "French": "fr",
+    "German": "de",
+    "Arabic": "ar",
+    "Chinese": "zh",
+    "Japanese": "ja",
+    "Korean": "ko",
+    "Portuguese": "pt",
+    "Russian": "ru",
+    "Italian": "it",
+}
+
 # Configure Google API
 try:
     api_key = os.getenv("GOOGLE_API_KEY")
@@ -339,6 +355,16 @@ st.markdown('<p class="sub-header">✨ Intelligent Document Analysis with Enhanc
 
 # Sidebar with bright styling
 with st.sidebar:
+    st.markdown("### 🎨 Settings")
+    
+    # Language selection for text-to-speech
+    language = st.selectbox(
+        "🌍 Select Language for Audio", 
+        list(LANGUAGE_MAPPING.keys()),
+        help="Choose your preferred language for text-to-speech playback"
+    )
+    
+    st.markdown("---")
     st.markdown("### 🎯 Status")
     if "vector_store_ready" in st.session_state and st.session_state.vector_store_ready:
         st.markdown("🟢 **PDF Processed Successfully!**")
@@ -352,7 +378,7 @@ with st.sidebar:
     # Fun fact section
     st.markdown("---")
     st.markdown("### 🎉 Fun Fact")
-    st.info("💡 Enhanced AI can find answers from your documents with improved intelligence!")
+    st.info(f"💡 Enhanced AI can read your documents and speak answers in {language}!")
 
 # File upload section with bright styling
 st.markdown('<div class="upload-section">', unsafe_allow_html=True)
@@ -699,14 +725,16 @@ if st.session_state.chat_history:
         st.markdown('<div class="feature-box">', unsafe_allow_html=True)
         if st.button("🔊🎵 Listen Magic", use_container_width=True):
             try:
+                # Get the language code for the selected language
+                lang_code = LANGUAGE_MAPPING[language]
                 response_text = st.session_state.chat_history[-1][1]
                 
-                # Use the speak_text function with English
-                if speak_text(response_text, "en"):
+                # Use the speak_text function with selected language
+                if speak_text(response_text, lang_code):
                     st.balloons()  # Fun animation!
-                    st.success(f"🎵✨ Audio is ready!")
+                    st.success(f"🎵✨ Audio is ready in {language}!")
                 else:
-                    st.error("Audio magic failed")
+                    st.error(f"Audio magic failed for {language}")
                     
             except Exception as e:
                 st.error(f"Audio magic failed: {str(e)}")
