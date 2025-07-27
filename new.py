@@ -728,7 +728,6 @@ with st.sidebar:
     st.info(f"AI can read your documents and speak answers in {language}")
 
 # File upload section
-st.markdown('<div class="upload-section">', unsafe_allow_html=True)
 st.markdown("### 📁 Upload Your Documents")
 st.markdown("**Drag & drop your PDF files here or click to browse**")
 uploaded_files = st.file_uploader(
@@ -737,7 +736,6 @@ uploaded_files = st.file_uploader(
     accept_multiple_files=True,
     help="Upload one or more PDF files to analyze"
 )
-st.markdown('</div>', unsafe_allow_html=True)
 
 def extract_text_from_pdfs(files):
     """Extract text from uploaded PDF files"""
