@@ -57,80 +57,166 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Simplified CSS with fewer colors
+# Professional Red-Orange CSS Theme
 st.markdown("""
 <style>
-    /* Main app background - simple blue gradient */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap');
+    
+    /* Main app background - Professional red-orange gradient */
     .stApp {
-        background: linear-gradient(135deg, #4a90e2 0%, #357abd 100%);
+        background: linear-gradient(135deg, #1a1a1a 0%, #2d1810 25%, #4a1810 50%, #6b2c17 75%, #8b3a1e 100%);
+        font-family: 'Inter', sans-serif;
     }
     
-    /* Main page container with glass effect */
+    /* Main page container with sophisticated glass effect */
     .main .block-container {
-        background: rgba(255, 255, 255, 0.15);
-        backdrop-filter: blur(15px);
-        border-radius: 15px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
-        padding: 2rem;
+        background: rgba(255, 255, 255, 0.05);
+        backdrop-filter: blur(20px);
+        border-radius: 20px;
+        border: 1px solid rgba(255, 87, 34, 0.2);
+        padding: 2.5rem;
         margin: 1rem;
-        box-shadow: 0 8px 25px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 25px 50px rgba(0, 0, 0, 0.25), 
+                    0 0 0 1px rgba(255, 87, 34, 0.1);
+        position: relative;
+    }
+    
+    /* Add subtle animated background pattern */
+    .main .block-container::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: radial-gradient(circle at 20% 80%, rgba(244, 67, 54, 0.1) 0%, transparent 50%),
+                    radial-gradient(circle at 80% 20%, rgba(255, 87, 34, 0.1) 0%, transparent 50%);
+        border-radius: 20px;
+        pointer-events: none;
+        z-index: -1;
     }
     
     .main-header {
-        font-size: 2.5rem;
+        font-size: 3rem;
         font-weight: 700;
-        color: #ffffff;
+        background: linear-gradient(135deg, #ff5722 0%, #f44336 50%, #d32f2f 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
         text-align: center;
         margin-bottom: 0.5rem;
-        text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        text-shadow: 0 4px 8px rgba(244, 67, 54, 0.3);
+        letter-spacing: -0.02em;
     }
     
     .sub-header {
         text-align: center;
         color: #ffffff;
         margin-bottom: 2rem;
-        font-size: 1.1rem;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
-        background: rgba(255, 255, 255, 0.1);
-        padding: 1rem;
-        border-radius: 10px;
-        backdrop-filter: blur(10px);
+        font-size: 1.2rem;
+        font-weight: 400;
+        background: rgba(255, 87, 34, 0.1);
+        padding: 1.2rem 2rem;
+        border-radius: 15px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.2);
+        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.1);
     }
     
     .upload-section {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 1.5rem;
-        border-radius: 12px;
-        border: 2px dashed rgba(255, 255, 255, 0.6);
-        margin: 1rem 0;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%);
+        padding: 2rem;
+        border-radius: 16px;
+        border: 2px dashed rgba(255, 87, 34, 0.4);
+        margin: 1.5rem 0;
+        box-shadow: 0 8px 30px rgba(255, 87, 34, 0.15);
+        transition: all 0.3s ease;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .upload-section::before {
+        content: '';
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: linear-gradient(45deg, transparent, rgba(255, 87, 34, 0.1), transparent);
+        transform: rotate(45deg);
+        animation: shimmer 3s infinite;
+    }
+    
+    @keyframes shimmer {
+        0% { transform: translateX(-100%) translateY(-100%) rotate(45deg); }
+        100% { transform: translateX(100%) translateY(100%) rotate(45deg); }
     }
     
     .user-message {
-        background: #4a90e2;
+        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
         color: white;
-        padding: 1rem;
-        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        border-radius: 15px;
         margin: 1rem 0;
-        border-left: 4px solid #357abd;
-        box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
+        border-left: 4px solid #d84315;
+        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.3);
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .user-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s;
+    }
+    
+    .user-message:hover::before {
+        transform: translateX(100%);
     }
     
     .bot-message {
-        background: #28a745;
+        background: linear-gradient(135deg, #bf360c 0%, #d84315 100%);
         color: white;
-        padding: 1rem;
-        border-radius: 12px;
+        padding: 1.2rem 1.5rem;
+        border-radius: 15px;
         margin: 1rem 0;
-        border-left: 4px solid #1e7e34;
-        box-shadow: 0 3px 10px rgba(40, 167, 69, 0.3);
+        border-left: 4px solid #8d2a0e;
+        box-shadow: 0 8px 25px rgba(191, 54, 12, 0.3);
+        font-weight: 500;
+        position: relative;
+        overflow: hidden;
     }
     
-    /* Sidebar with simple gradient */
+    .bot-message::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        bottom: 0;
+        background: linear-gradient(45deg, transparent, rgba(255, 255, 255, 0.1), transparent);
+        transform: translateX(-100%);
+        transition: transform 0.6s;
+    }
+    
+    .bot-message:hover::before {
+        transform: translateX(100%);
+    }
+    
+    /* Professional Sidebar */
     .css-1d391kg, .css-18e3th9, section[data-testid="stSidebar"] {
-        background: linear-gradient(180deg, #4a90e2 0%, #357abd 100%);
-        border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.2);
+        background: linear-gradient(180deg, rgba(26, 26, 26, 0.95) 0%, rgba(45, 24, 16, 0.95) 50%, rgba(74, 24, 16, 0.95) 100%);
+        backdrop-filter: blur(20px);
+        border-radius: 15px;
+        border: 1px solid rgba(255, 87, 34, 0.2);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.3);
     }
     
     .css-1d391kg > div {
@@ -138,92 +224,159 @@ st.markdown("""
     }
     
     .feature-box {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 1.2rem;
-        border-radius: 10px;
-        box-shadow: 0 3px 12px rgba(0, 0, 0, 0.1);
-        margin: 0.5rem 0;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
+        padding: 1.5rem;
+        border-radius: 12px;
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
+        margin: 0.8rem 0;
         text-align: center;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 87, 34, 0.25);
+        backdrop-filter: blur(15px);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .feature-box::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
     }
     
     .feature-box:hover {
-        transform: translateY(-2px);
-        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
-        background: rgba(255, 255, 255, 0.25);
+        transform: translateY(-3px) scale(1.02);
+        box-shadow: 0 12px 30px rgba(255, 87, 34, 0.25);
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.25) 0%, rgba(244, 67, 54, 0.2) 100%);
+        border-color: rgba(255, 87, 34, 0.4);
     }
     
-    /* Button styling - simple blue theme */
+    .feature-box:hover::before {
+        left: 100%;
+    }
+    
+    /* Professional Button Styling */
     .stButton > button {
-        background: #4a90e2;
+        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
         color: white;
         border: none;
-        border-radius: 8px;
-        padding: 0.6rem 1.8rem;
+        border-radius: 12px;
+        padding: 0.8rem 2rem;
         font-weight: 600;
-        box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3);
-        transition: all 0.2s ease;
+        font-size: 0.95rem;
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.3);
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        position: relative;
+        overflow: hidden;
+        letter-spacing: 0.5px;
+    }
+    
+    .stButton > button::before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: left 0.5s;
     }
     
     .stButton > button:hover {
-        transform: translateY(-1px);
-        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4);
-        background: #357abd;
+        transform: translateY(-2px);
+        box-shadow: 0 10px 30px rgba(255, 87, 34, 0.4);
+        background: linear-gradient(135deg, #f4511e 0%, #d84315 100%);
     }
     
-    /* Input field styling */
+    .stButton > button:hover::before {
+        left: 100%;
+    }
+    
+    .stButton > button:active {
+        transform: translateY(0px);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.3);
+    }
+    
+    /* Enhanced Input Field Styling */
     .stTextInput > div > div > input {
-        border-radius: 8px;
-        border: 2px solid #4a90e2;
-        padding: 0.6rem 1rem;
-        background: rgba(255, 255, 255, 0.9);
+        border-radius: 12px;
+        border: 2px solid rgba(255, 87, 34, 0.3);
+        padding: 0.8rem 1.2rem;
+        background: rgba(255, 255, 255, 0.1);
+        color: #ffffff;
+        font-size: 1rem;
+        font-weight: 500;
+        backdrop-filter: blur(10px);
+        transition: all 0.3s ease;
+    }
+    
+    .stTextInput > div > div > input::placeholder {
+        color: rgba(255, 255, 255, 0.6);
     }
     
     .stTextInput > div > div > input:focus {
-        border-color: #357abd;
-        box-shadow: 0 0 10px rgba(74, 144, 226, 0.3);
+        border-color: #ff5722;
+        box-shadow: 0 0 20px rgba(255, 87, 34, 0.3);
+        background: rgba(255, 255, 255, 0.15);
+        outline: none;
     }
     
-    /* Section headers */
+    /* Professional Section Headers */
     h3 {
         color: #ffffff;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
         font-weight: 600;
-        background: rgba(255, 255, 255, 0.1);
-        padding: 0.5rem 1rem;
-        border-radius: 8px;
-        backdrop-filter: blur(10px);
+        font-size: 1.3rem;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.1) 100%);
+        padding: 0.8rem 1.5rem;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.25);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
+        margin-bottom: 1rem;
     }
     
     /* Radio button container */
     .stRadio > div {
-        background: rgba(255, 255, 255, 0.15);
-        padding: 1rem;
-        border-radius: 10px;
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: rgba(255, 87, 34, 0.1);
+        padding: 1.2rem;
+        border-radius: 12px;
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.2);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
     }
     
     /* Metrics styling */
     .css-1r6slb0 {
-        background: rgba(255, 255, 255, 0.2);
-        border-radius: 10px;
-        padding: 1rem;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
+        border-radius: 12px;
+        padding: 1.2rem;
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.15);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.2);
     }
     
-    /* File uploader styling */
+    /* Enhanced File uploader styling */
     .css-1cpxqw2, 
     section[data-testid="stFileUploader"],
     .css-1cpxqw2 > div,
     div[data-testid="stFileUploader"] {
-        background: rgba(255, 255, 255, 0.1) !important;
-        border-radius: 12px !important;
-        border: 2px dashed rgba(255, 255, 255, 0.8) !important;
-        padding: 1.5rem !important;
-        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1) !important;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.1) 0%, rgba(244, 67, 54, 0.05) 100%) !important;
+        border-radius: 16px !important;
+        border: 2px dashed rgba(255, 87, 34, 0.4) !important;
+        padding: 2rem !important;
+        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.15) !important;
+        transition: all 0.3s ease !important;
+        position: relative !important;
+    }
+    
+    div[data-testid="stFileUploader"]:hover {
+        border-color: rgba(255, 87, 34, 0.6) !important;
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%) !important;
+        transform: translateY(-2px) !important;
     }
     
     /* File uploader text styling */
@@ -231,102 +384,154 @@ st.markdown("""
     div[data-testid="stFileUploader"] p,
     div[data-testid="stFileUploader"] small {
         color: #ffffff !important;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5) !important;
         font-weight: 500 !important;
     }
     
     /* Browse files button styling */
     div[data-testid="stFileUploader"] button {
-        background: #4a90e2 !important;
+        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%) !important;
         color: white !important;
         border: none !important;
-        border-radius: 8px !important;
-        padding: 0.6rem 1.5rem !important;
+        border-radius: 10px !important;
+        padding: 0.8rem 1.8rem !important;
         font-weight: 600 !important;
-        box-shadow: 0 3px 10px rgba(74, 144, 226, 0.3) !important;
-        transition: all 0.2s ease !important;
+        box-shadow: 0 6px 20px rgba(255, 87, 34, 0.3) !important;
+        transition: all 0.3s ease !important;
     }
     
     div[data-testid="stFileUploader"] button:hover {
-        transform: translateY(-1px) !important;
-        box-shadow: 0 4px 15px rgba(74, 144, 226, 0.4) !important;
-        background: #357abd !important;
+        transform: translateY(-2px) !important;
+        box-shadow: 0 8px 25px rgba(255, 87, 34, 0.4) !important;
+        background: linear-gradient(135deg, #f4511e 0%, #d84315 100%) !important;
     }
     
     /* File upload icon styling */
     div[data-testid="stFileUploader"] svg {
         color: #ffffff !important;
-        filter: drop-shadow(1px 1px 2px rgba(0,0,0,0.5)) !important;
+        filter: drop-shadow(0 2px 4px rgba(255, 87, 34, 0.3)) !important;
     }
     
     /* Sidebar content styling */
     .css-18e3th9 {
         background: transparent !important;
-        padding: 1rem;
-        border-radius: 10px;
+        padding: 1.2rem;
+        border-radius: 15px;
     }
     
     /* Sidebar text styling */
     section[data-testid="stSidebar"] h3 {
-        background: rgba(255, 255, 255, 0.2);
-        padding: 0.6rem 1rem;
-        border-radius: 8px;
-        backdrop-filter: blur(15px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.15) 100%);
+        padding: 0.8rem 1.2rem;
+        border-radius: 10px;
+        backdrop-filter: blur(20px);
+        border: 1px solid rgba(255, 87, 34, 0.25);
         color: #ffffff;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
     }
     
     /* Sidebar metrics styling */
     section[data-testid="stSidebar"] .css-1r6slb0 {
-        background: rgba(255, 255, 255, 0.2);
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.15) 0%, rgba(244, 67, 54, 0.1) 100%);
         border-radius: 10px;
         padding: 1rem;
-        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
-        backdrop-filter: blur(10px);
-        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
+        backdrop-filter: blur(15px);
+        border: 1px solid rgba(255, 87, 34, 0.2);
     }
     
     /* Sidebar info box styling */
     section[data-testid="stSidebar"] .stAlert {
-        background: rgba(255, 255, 255, 0.2);
+        background: linear-gradient(135deg, rgba(255, 87, 34, 0.2) 0%, rgba(244, 67, 54, 0.15) 100%);
         color: #ffffff;
         border-radius: 10px;
-        border: 1px solid rgba(255, 255, 255, 0.3);
-        backdrop-filter: blur(10px);
+        border: 1px solid rgba(255, 87, 34, 0.25);
+        backdrop-filter: blur(15px);
+        box-shadow: 0 4px 15px rgba(255, 87, 34, 0.1);
     }
     
     /* Sidebar markdown text */
     section[data-testid="stSidebar"] p, 
     section[data-testid="stSidebar"] .stMarkdown {
         color: #ffffff;
-        text-shadow: 1px 1px 2px rgba(0,0,0,0.5);
+        font-weight: 400;
     }
 
-    /* Success and error messages */
+    /* Enhanced Success, Error, and Warning messages */
     .stSuccess {
-        background: #28a745;
+        background: linear-gradient(135deg, #4caf50 0%, #388e3c 100%);
         color: white;
-        border-radius: 8px;
+        border-radius: 12px;
+        border: 1px solid rgba(76, 175, 80, 0.3);
+        box-shadow: 0 6px 20px rgba(76, 175, 80, 0.2);
     }
     
     .stError {
-        background: #dc3545;
+        background: linear-gradient(135deg, #f44336 0%, #d32f2f 100%);
         color: white;
-        border-radius: 8px;
+        border-radius: 12px;
+        border: 1px solid rgba(244, 67, 54, 0.3);
+        box-shadow: 0 6px 20px rgba(244, 67, 54, 0.2);
     }
     
     .stWarning {
-        background: #ffc107;
-        color: #212529;
-        border-radius: 8px;
+        background: linear-gradient(135deg, #ff9800 0%, #f57c00 100%);
+        color: white;
+        border-radius: 12px;
+        border: 1px solid rgba(255, 152, 0, 0.3);
+        box-shadow: 0 6px 20px rgba(255, 152, 0, 0.2);
+    }
+    
+    /* Custom scrollbar */
+    ::-webkit-scrollbar {
+        width: 8px;
+        height: 8px;
+    }
+    
+    ::-webkit-scrollbar-track {
+        background: rgba(255, 87, 34, 0.1);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb {
+        background: linear-gradient(135deg, #ff5722 0%, #f4511e 100%);
+        border-radius: 4px;
+    }
+    
+    ::-webkit-scrollbar-thumb:hover {
+        background: linear-gradient(135deg, #f4511e 0%, #d84315 100%);
+    }
+    
+    /* Loading spinner animation */
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    /* Responsive design improvements */
+    @media (max-width: 768px) {
+        .main-header {
+            font-size: 2.2rem;
+        }
+        
+        .sub-header {
+            font-size: 1rem;
+            padding: 1rem 1.5rem;
+        }
+        
+        .upload-section {
+            padding: 1.5rem;
+        }
+        
+        .feature-box {
+            padding: 1.2rem;
+        }
     }
 </style>
 """, unsafe_allow_html=True)
 
 # Main title
 st.markdown('<h1 class="main-header">📄 AI PDF Chatbot</h1>', unsafe_allow_html=True)
-st.markdown('<p class="sub-header">Intelligent Document Analysis with Enhanced Answer Retrieval</p>', unsafe_allow_html=True)
+st.markdown('<p class="sub-header">Professional Document Analysis with Enhanced AI Intelligence</p>', unsafe_allow_html=True)
 
 # Sidebar
 with st.sidebar:
@@ -759,13 +964,14 @@ if st.session_state.chat_history:
 st.markdown("---")
 st.markdown(
     """
-    <div style='text-align: center; color: #ffffff; padding: 1.5rem; background: #4a90e2; border-radius: 10px; margin-top: 2rem; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);'>
-        <h3>📄 AI PDF Chatbot</h3>
-        <p style='font-size: 1rem; margin-top: 1rem;'>
-            <strong>Upload PDF → Ask Questions → Get Answers</strong>
+    <div style='text-align: center; color: #ffffff; padding: 2rem; background: linear-gradient(135deg, #ff5722 0%, #f4511e 50%, #d84315 100%); border-radius: 15px; margin-top: 2rem; box-shadow: 0 8px 30px rgba(255, 87, 34, 0.3); position: relative; overflow: hidden;'>
+        <div style='position: absolute; top: 0; left: 0; right: 0; bottom: 0; background: radial-gradient(circle at 30% 70%, rgba(255, 255, 255, 0.1) 0%, transparent 50%); pointer-events: none;'></div>
+        <h3 style='margin: 0; font-size: 1.8rem; font-weight: 700; text-shadow: 2px 2px 4px rgba(0,0,0,0.3); position: relative; z-index: 1;'>📄 AI PDF Chatbot</h3>
+        <p style='font-size: 1.1rem; margin: 1rem 0; font-weight: 500; position: relative; z-index: 1;'>
+            <strong>Upload PDF → Ask Questions → Get Intelligent Answers</strong>
         </p>
-        <p style='font-size: 0.9rem; opacity: 0.9;'>
-            Experience intelligent document analysis with AI
+        <p style='font-size: 0.95rem; opacity: 0.9; margin: 0; position: relative; z-index: 1;'>
+            Experience next-generation document analysis with professional AI assistance
         </p>
     </div>
     """, 
